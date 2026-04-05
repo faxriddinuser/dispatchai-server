@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DispatchAI — Gmail Integration</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:#0e1117;color:#f0f2f8;min-height:100vh;}
+.header{background:#111827;border-bottom:2px solid #f4a935;padding:14px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;color:#f4a935;letter-spacing:1px;}
+.logo span{color:#fff;}
+.conn-badge{background:#0f2d1a;border:1px solid #4ade80;border-radius:20px;font-size:11px;font-weight:700;color:#4ade80;padding:4px 14px;display:none;}
+.conn-badge.on{display:inline-block;}
+.auto-badge{background:#0a1a2e;border:1px solid #1e3a5f;border-radius:20px;font-size:11px;font-weight:600;color:#60a5fa;padding:4px 14px;display:none;align-items:center;gap:6px;}
+.auto-badge.on{display:inline-flex;}
+.dot{width:7px;height:7px;border-radius:50%;background:#60a5fa;animation:pulse 1.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.nav{display:flex;gap:6px;margin-left:auto;}
+.nav-btn{background:#2d3748;border:1.5px solid #4b5563;color:#f3f4f6;font-size:12px;font-weight:600;padding:7px 14px;border-radius:7px;cursor:pointer;transition:all .15s;}
+.nav-btn.active{background:#f4a935;border-color:#f4a935;color:#111827;}
+.nav-btn:hover:not(.active){background:#374151;color:#fff;}
+.content{max-width:1100px;margin:0 auto;padding:24px;}
+.page{display:none;}.page.on{display:block;}
+.panel{background:#1e2535;border:1px solid #2d3748;border-radius:12px;padding:20px 24px;margin-bottom:20px;}
+.ptitle{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;letter-spacing:1px;color:#f4a935;margin-bottom:16px;text-transform:uppercase;border-bottom:1px solid #2d3748;padding-bottom:10px;}
+.lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;color:#9ca3af;text-transform:uppercase;margin-bottom:7px;}
+.inp{width:100%;background:#111827;border:1.5px solid #374151;border-radius:8px;color:#f9fafb;font-family:'Barlow',sans-serif;font-size:14px;padding:11px 14px;outline:none;transition:border-color .15s;}
+.inp::placeholder{color:#6b7280;}
+.inp:focus{border-color:#f4a935;}
+select.inp option{background:#111827;}
+.btn{background:#f4a935;border:none;border-radius:8px;color:#111827;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;padding:12px 24px;cursor:pointer;text-transform:uppercase;transition:background .15s;display:inline-flex;align-items:center;gap:8px;}
+.btn:hover{background:#fbbf24;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn-sec{background:#1f2937;border:1.5px solid #4b5563;border-radius:8px;color:#d1d5db;font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;padding:10px 18px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.btn-sec:hover{background:#374151;color:#fff;}
+.btn-red{background:#2d0f0f;border:1.5px solid #7f1d1d;border-radius:8px;color:#f87171;font-size:13px;padding:10px 18px;cursor:pointer;}
+.btn-red:hover{background:#450f0f;}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #374151;border-top-color:#f4a935;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.stat{background:#111827;border:1.5px solid #2d3748;border-radius:10px;padding:16px 12px;text-align:center;}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:#f4a935;}
+.stat-lbl{font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-top:4px;}
+.email-list{display:flex;flex-direction:column;gap:10px;max-height:500px;overflow-y:auto;}
+.eitem{background:#111827;border:1.5px solid #2d3748;border-radius:10px;overflow:hidden;}
+.eitem.done{border-color:#4ade80;}.eitem.failed{border-color:#f87171;}.eitem.processing{border-color:#f4a935;}
+.ehead{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;}
+.ehead:hover{background:#1a2035;}
+.efrom{font-size:13px;font-weight:600;color:#f9fafb;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.edate{font-size:12px;color:#6b7280;flex-shrink:0;}
+.ebadge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;flex-shrink:0;}
+.eb-new{background:#3d2900;color:#f4a935;}.eb-proc{background:#1e1500;color:#f4a935;}.eb-done{background:#0f2d1a;color:#4ade80;}.eb-failed{background:#2d0f0f;color:#f87171;}.eb-skip{background:#1f2937;color:#6b7280;}
+.ebody{padding:0 16px 14px;display:none;flex-direction:column;gap:10px;}
+.ebody.open{display:flex;}
+.esubject{font-size:14px;font-weight:600;color:#e5e7eb;}
+.esnip{font-size:13px;color:#9ca3af;line-height:1.5;}
+.eatts{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.eatt{background:#1a1f2e;border:1px solid #374151;border-radius:6px;padding:5px 12px;font-size:12px;color:#d1d5db;}
+.eacts{display:flex;gap:8px;margin-top:8px;}
+.ebtn{background:#1f2937;border:1.5px solid #4b5563;border-radius:7px;color:#d1d5db;font-size:12px;padding:7px 14px;cursor:pointer;}
+.ebtn:hover{background:#374151;color:#fff;}
+.ebtn.primary{background:#f4a935;border-color:#f4a935;color:#111;font-weight:700;}
+.log-box{background:#0a0d14;border:1.5px solid #2d3748;border-radius:8px;padding:14px;font-family:'Courier New',monospace;font-size:12px;color:#6b7280;max-height:200px;overflow-y:auto;line-height:1.9;}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.pill{background:#1f2937;border:1.5px solid #4b5563;border-radius:20px;color:#d1d5db;font-size:12px;font-weight:500;padding:5px 16px;cursor:pointer;transition:all .15s;}
+.pill.active{background:#3d2900;border-color:#f4a935;color:#fbbf24;}
+.load-card{background:#111827;border:1.5px solid #2d3748;border-radius:12px;overflow:hidden;margin-bottom:12px;}
+.load-card.assigned{border-left:5px solid #4ade80;}.load-card.unassigned{border-left:5px solid #f4a935;}.load-card.sent{border-left:5px solid #60a5fa;}
+.lc-head{display:flex;align-items:center;gap:12px;padding:14px 18px;background:#1a2035;}
+.lc-num{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:#f4a935;}
+.lc-broker{font-size:13px;color:#9ca3af;flex:1;}
+.lc-body{padding:16px 18px;display:flex;flex-direction:column;gap:12px;}
+.lc-stop{display:flex;gap:12px;font-size:13px;}
+.stag{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:3px 10px;border-radius:5px;flex-shrink:0;}
+.tag-pu{background:#3d2900;color:#f4a935;}.tag-del{background:#0a1f3d;color:#60a5fa;}
+.stop-info{color:#d1d5db;line-height:1.6;}
+.notes-box{background:#1a2035;border:1px solid #374151;border-radius:8px;padding:12px 14px;font-size:12px;color:#9ca3af;line-height:1.6;max-height:80px;overflow-y:auto;}
+.lc-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:12px;border-top:1px solid #1e2535;}
+.drv-sel{background:#1a1f2e;border:1.5px solid #374151;border-radius:8px;color:#f9fafb;font-family:'Barlow',sans-serif;font-size:13px;padding:10px 12px;outline:none;cursor:pointer;flex:1;min-width:180px;}
+.drv-sel option{background:#111827;}
+.assign-btn{background:#f4a935;border:none;border-radius:8px;color:#111827;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;padding:10px 20px;cursor:pointer;}
+.assign-btn:hover{background:#fbbf24;}
+.msg-btn{background:#1f2937;border:1.5px solid #374151;border-radius:8px;color:#d1d5db;font-size:13px;padding:10px 16px;cursor:pointer;}
+.msg-btn:hover{background:#374151;color:#fff;}
+.msg-btn:disabled{opacity:.4;cursor:not-allowed;}
+.info{background:#0a1a2e;border:1px solid #1e3a5f;border-radius:8px;padding:14px 16px;font-size:13px;color:#93c5fd;line-height:1.8;}
+.success-box{background:#0f2d1a;border:1px solid #166534;border-radius:12px;padding:24px;text-align:center;}
+.empty{text-align:center;padding:40px;color:#4a5570;font-size:14px;}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.modal-bg.on{display:flex;}
+.modal{background:#1e2535;border:1.5px solid #374151;border-radius:14px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+.modal-head{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid #374151;background:#111827;border-radius:14px 14px 0 0;}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:#f4a935;flex:1;}
+.close-btn{background:none;border:none;color:#6b7280;font-size:26px;cursor:pointer;line-height:1;}
+.close-btn:hover{color:#f87171;}
+.modal-body{padding:20px 22px;display:flex;flex-direction:column;gap:16px;}
+.msg-out{background:#0a0d14;border:1.5px solid #374151;border-radius:10px;padding:18px;font-family:'Courier New',monospace;font-size:14px;line-height:1.9;color:#f0f2f8;white-space:pre-wrap;min-height:200px;}
+.msg-out.loading{color:#6b7280;font-style:italic;font-family:'Barlow',sans-serif;}
+.toast{position:fixed;bottom:24px;right:24px;background:#f4a935;color:#111;padding:12px 22px;border-radius:10px;font-weight:700;font-size:14px;z-index:9999;transition:opacity .3s;box-shadow:0 4px 20px rgba(0,0,0,.4);}
+.toast.err{background:#f87171;color:#fff;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">DISPATCH<span>AI</span> <span style="font-size:13px;font-weight:500;color:#9ca3af;">/ Gmail Load Board</span></div>
+  <span class="conn-badge" id="conn-badge">● Gmail Connected</span>
+  <div class="auto-badge" id="auto-badge"><span class="dot"></span> Auto-scanning</div>
+  <div class="nav">
+    <button class="nav-btn active" onclick="showPage('setup',this)">Setup</button>
+    <button class="nav-btn" onclick="showPage('scanner',this)">Inbox Scanner</button>
+    <button class="nav-btn" onclick="showPage('loads',this)">Load Board</button>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- SETUP -->
+  <div id="page-setup" class="page on">
+    <div class="panel">
+      <div class="ptitle">🔌 Connection Status</div>
+      <div id="status-checking" style="color:#9ca3af;font-size:14px;"><span class="spinner"></span> Checking Gmail connection...</div>
+      <div id="status-connected" style="display:none;">
+        <div class="success-box">
+          <div style="font-size:40px;margin-bottom:10px;">✅</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;color:#4ade80;margin-bottom:6px;">Gmail Connected!</div>
+          <div style="font-size:13px;color:#9ca3af;margin-bottom:18px;">Your Gmail is authorized. Go to Inbox Scanner to start.</div>
+          <button class="btn" onclick="showPage('scanner',document.querySelectorAll('.nav-btn')[1])">Go to Inbox Scanner →</button>
+        </div>
+      </div>
+      <div id="status-disconnected" style="display:none;">
+        <div class="info" style="margin-bottom:14px;">Gmail is not connected yet. Click the button below to authorize.</div>
+        <a href="/auth" class="btn" style="text-decoration:none;display:inline-flex;">Connect Gmail →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCANNER -->
+  <div id="page-scanner" class="page">
+    <div class="panel">
+      <div class="ptitle">📡 Inbox Scanner</div>
+      <div class="grid2" style="margin-bottom:16px;">
+        <div>
+          <div class="lbl">Keywords</div>
+          <input class="inp" id="keywords" value="rate confirmation OR rate con OR load confirmation">
+        </div>
+        <div>
+          <div class="lbl">Max Emails</div>
+          <select class="inp" id="scan-limit">
+            <option value="10">Last 10</option>
+            <option value="25" selected>Last 25</option>
+            <option value="50">Last 50</option>
+          </select>
+        </div>
+        <div>
+          <div class="lbl">Filter</div>
+          <select class="inp" id="att-filter">
+            <option value="attachment" selected>With PDF/doc attachments</option>
+            <option value="any">Any matching email</option>
+          </select>
+        </div>
+        <div>
+          <div class="lbl">Auto-Scan Every</div>
+          <select class="inp" id="auto-int">
+            <option value="0">Manual only</option>
+            <option value="5">5 minutes</option>
+            <option value="10" selected>10 minutes</option>
+            <option value="30">30 minutes</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn" onclick="scanInbox()" id="scan-btn">🔍 Scan Inbox Now</button>
+        <button class="btn-sec" onclick="toggleAuto()" id="auto-btn">▶ Start Auto-Scan</button>
+        <button class="btn-sec" onclick="processAll()">⚡ Process All New</button>
+        <button class="btn-red" onclick="clearEmails()">🗑 Clear</button>
+      </div>
+      <div class="grid4" style="margin-top:16px;">
+        <div class="stat"><div class="stat-val" id="st-found">0</div><div class="stat-lbl">Found</div></div>
+        <div class="stat"><div class="stat-val" id="st-proc" style="color:#4ade80;">0</div><div class="stat-lbl">Processed</div></div>
+        <div class="stat"><div class="stat-val" id="st-loads" style="color:#60a5fa;">0</div><div class="stat-lbl">Loads Created</div></div>
+        <div class="stat"><div class="stat-val" id="st-fail" style="color:#f87171;">0</div><div class="stat-lbl">Failed</div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ptitle">📟 Activity Log</div>
+      <div class="log-box" id="log-box"><span style="color:#9ca3af;">[SYSTEM] Ready. Click Scan Inbox Now to start.</span></div>
+    </div>
+    <div class="panel">
+      <div class="ptitle">📬 Emails Found</div>
+      <div class="filter-row">
+        <button class="pill active" onclick="setEF('all',this)">All</button>
+        <button class="pill" onclick="setEF('new',this)">New</button>
+        <button class="pill" onclick="setEF('done',this)">Processed</button>
+        <button class="pill" onclick="setEF('failed',this)">Failed</button>
+      </div>
+      <div class="email-list" id="email-list"><div class="empty">No emails yet — click Scan Inbox Now</div></div>
+    </div>
+  </div>
+
+  <!-- LOADS -->
+  <div id="page-loads" class="page">
+    <div class="panel">
+      <div class="ptitle">🚛 Load Board <span id="load-count" style="margin-left:auto;background:#3d2900;color:#f4a935;font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;">0 loads</span></div>
+      <div class="filter-row">
+        <button class="pill active" onclick="setLF('all',this)">All</button>
+        <button class="pill" onclick="setLF('unassigned',this)">Unassigned</button>
+        <button class="pill" onclick="setLF('assigned',this)">Assigned</button>
+        <button class="pill" onclick="setLF('sent',this)">Sent</button>
+        <button class="btn-red" onclick="clearLoads()" style="margin-left:auto;font-size:12px;padding:7px 14px;">Clear All</button>
+      </div>
+      <div id="load-board"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">Driver Message</div>
+      <button class="close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div><div class="lbl">Driver</div><div style="font-size:15px;font-weight:600;color:#f3f4f6;" id="modal-driver">—</div></div>
+      <div><div class="lbl">Message</div><div class="msg-out loading" id="modal-msg"><span class="spinner"></span> Generating...</div></div>
+      <div><div class="lbl">Extra Notes</div><textarea class="inp" id="modal-notes" style="min-height:60px;font-size:13px;" placeholder="Extra driver instructions..."></textarea></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn" onclick="copyMsg()">📋 Copy Message</button>
+        <button class="btn-sec" onclick="regenMsg()">↻ Regenerate</button>
+        <button class="btn-sec" onclick="markSent()">✅ Mark Sent</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DRIVERS=[
+  {name:"(ILY) Christopher Tidwell",truck:"487040",d:"Myles/Theodore"},
+  {name:"(ILY) Wilkens Sine",truck:"838900",d:"Myles/Theodore"},
+  {name:"(ILY) Saintclair Maxwell",truck:"544609",d:"Myles/Theodore"},
+  {name:"(ILY) Romel Joseph",truck:"704662",d:"Myles/Theodore"},
+  {name:"(ILY) Wilson Aristide",truck:"181",d:"Myles/Theodore"},
+  {name:"(ILY) Juan Carlos Franco",truck:"841074",d:"Myles/Theodore"},
+  {name:"(ILY) Joseph Lorve",truck:"544609",d:"Myles/Theodore"},
+  {name:"(ILY) Abdul Sweed / Ahmad Reda",truck:"704662",d:"Myles/Theodore"},
+  {name:"(ILY) Stanley Larosiliere",truck:"838897",d:"Myles/Theodore"},
+  {name:"(ILY) Fox Kelby",truck:"544672",d:"Myles/Theodore"},
+  {name:"(ILY) Stanley Petit Homme",truck:"150",d:"Myles/Theodore"},
+  {name:"(ILY) Wilgens Casseus",truck:"177",d:"Myles/Theodore"},
+  {name:"(ILY) Millot Ramolien",truck:"841076",d:"Myles/Theodore"},
+  {name:"(ILY) Mossanto Pierre",truck:"147",d:"Myles/Theodore"},
+  {name:"(ILY) Inalien Exalien",truck:"157",d:"Austin Kennedy"},
+  {name:"(ILY) Delma Wilfourd",truck:"175",d:"Austin Kennedy"},
+  {name:"(ILY) Aaron Odell",truck:"712588",d:"Austin Kennedy"},
+  {name:"(ILY) Mardell Wallace",truck:"196",d:"Austin Kennedy"},
+  {name:"(ILY) Pierre Dabens",truck:"132",d:"Austin Kennedy"},
+  {name:"(ILY) Roobenco Gerbier",truck:"403634",d:"Austin Kennedy"},
+  {name:"(ILY) Jean Alix Augustin",truck:"199",d:"Austin Kennedy"},
+  {name:"(ILY) Mackenson Abraham",truck:"841074",d:"Austin Kennedy"},
+  {name:"(ILY) Chatelain Bagnio",truck:"704685",d:"Austin Kennedy"},
+];
+
+let emails=[],loads=[],eFilter='all',lFilter='all',autoTimer=null,autoOn=false,currentMsgId=null,currentMsgText='';
+let stats={found:0,proc:0,loads:0,fail:0};
+
+async function checkStatus(){
+  try{
+    const r=await fetch('/status');
+    const d=await r.json();
+    document.getElementById('status-checking').style.display='none';
+    if(d.connected){
+      document.getElementById('status-connected').style.display='block';
+      document.getElementById('conn-badge').classList.add('on');
+      log('success','Gmail connected and ready.');
+    }else{
+      document.getElementById('status-disconnected').style.display='block';
+    }
+  }catch(e){
+    document.getElementById('status-checking').style.display='none';
+    document.getElementById('status-disconnected').style.display='block';
+  }
+}
+
+async function scanInbox(){
+  const btn=document.getElementById('scan-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Scanning...';
+  log('info','Scanning inbox...');
+  try{
+    const kw=document.getElementById('keywords').value;
+    const limit=document.getElementById('scan-limit').value;
+    const attOnly=document.getElementById('att-filter').value==='attachment';
+    let q=kw;if(attOnly)q+=' has:attachment';
+    const r=await fetch(`/emails?q=${encodeURIComponent(q)}&maxResults=${limit}`);
+    const data=await r.json();
+    if(data.error)throw new Error(data.error);
+    const msgs=data.messages||[];
+    stats.found=msgs.length;updateStats();
+    let added=0;
+    for(const msg of msgs){
+      if(emails.find(e=>e.id===msg.id))continue;
+      emails.unshift({...msg,status:'new'});added++;
+    }
+    renderEmails();
+    log('success',`Scan complete. ${added} new emails.`);
+    toast(`Found ${msgs.length} emails, ${added} new`);
+  }catch(e){log('error','Scan failed: '+e.message);toast(e.message,'err');}
+  btn.disabled=false;btn.innerHTML='🔍 Scan Inbox Now';
+}
+
+async function processEmail(id){
+  const email=emails.find(e=>e.id===id);if(!email)return;
+  email.status='processing';renderEmails();
+  log('info',`Processing: "${email.subject}"`);
+  try{
+    let created=0;
+    for(const att of(email.attachments||[])){
+      log('info',`Downloading: ${att.name}`);
+      try{
+        const r=await fetch(`/attachment/${att.msgId}/${att.id}`);
+        const data=await r.json();
+        if(!data.data)continue;
+        const b64=data.data.replace(/-/g,'+').replace(/_/g,'/');
+        const er=await fetch('/extract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({b64,mimeType:att.mimeType,emailNotes:`From: ${email.from}\nSubject: ${email.subject}\nDate: ${email.date}\n\n${email.snippet}`})});
+        const ed=await er.json();
+        if(ed.load&&(ed.load.loadNumber||ed.load.stops?.length)){
+          loads.unshift({...ed.load,id:'ld_'+Date.now()+'_'+Math.random().toString(36).slice(2),status:'unassigned',assignedDriver:null,source:att.name,createdAt:new Date().toISOString()});
+          created++;stats.loads++;
+        }
+      }catch(e){log('error',`Attachment failed: ${e.message}`);}
+    }
+    if(!created&&email.snippet){
+      try{
+        const er=await fetch('/extract-text',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:email.snippet,emailNotes:`From: ${email.from}\nSubject: ${email.subject}\nDate: ${email.date}\n\n${email.snippet}`})});
+        const ed=await er.json();
+        if(ed.load&&(ed.load.loadNumber||ed.load.stops?.length)){
+          loads.unshift({...ed.load,id:'ld_'+Date.now()+'_'+Math.random().toString(36).slice(2),status:'unassigned',assignedDriver:null,source:'email body',createdAt:new Date().toISOString()});
+          created++;stats.loads++;
+        }
+      }catch(e){}
+    }
+    email.status=created>0?'done':'skipped';stats.proc++;
+    log('success',`${created} load(s) created from "${email.subject}"`);
+  }catch(e){email.status='failed';stats.fail++;log('error','Failed: '+e.message);}
+  renderEmails();renderLoads();updateStats();
+}
+
+async function processAll(){
+  const news=emails.filter(e=>e.status==='new');
+  if(!news.length){toast('No new emails to process');return;}
+  log('info',`Processing ${news.length} emails...`);
+  for(const e of news){await processEmail(e.id);await new Promise(r=>setTimeout(r,800));}
+  toast('Done! Check Load Board.');
+}
+
+function toggleAuto(){
+  const btn=document.getElementById('auto-btn');
+  const badge=document.getElementById('auto-badge');
+  if(autoOn){clearInterval(autoTimer);autoOn=false;btn.innerHTML='▶ Start Auto-Scan';badge.classList.remove('on');log('info','Auto-scan stopped.');}
+  else{
+    const mins=parseInt(document.getElementById('auto-int').value);
+    if(!mins){toast('Select an interval first');return;}
+    autoOn=true;btn.innerHTML='■ Stop Auto-Scan';badge.classList.add('on');
+    scanInbox().then(processAll);
+    autoTimer=setInterval(()=>{scanInbox().then(processAll);},mins*60000);
+    log('success',`Auto-scan every ${mins} min.`);
+  }
+}
+
+function setEF(f,btn){eFilter=f;document.querySelectorAll('#page-scanner .filter-row .pill').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderEmails();}
+function setLF(f,btn){lFilter=f;document.querySelectorAll('#page-loads .filter-row .pill').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderLoads();}
+
+function renderEmails(){
+  const filtered=eFilter==='all'?emails:emails.filter(e=>e.status===eFilter);
+  const c=document.getElementById('email-list');
+  if(!filtered.length){c.innerHTML=`<div class="empty">${eFilter==='all'?'No emails — click Scan Inbox Now':'No '+eFilter+' emails'}</div>`;return;}
+  c.innerHTML=filtered.map(e=>{
+    const bc=e.status==='done'?'eb-done':e.status==='failed'?'eb-failed':e.status==='processing'?'eb-proc':e.status==='skipped'?'eb-skip':'eb-new';
+    const bl=e.status==='done'?'Done ✓':e.status==='failed'?'Failed ✗':e.status==='processing'?'Processing...':e.status==='skipped'?'Skipped':'New';
+    const atts=(e.attachments||[]).map(a=>`<span class="eatt">📄 ${a.name}</span>`).join('');
+    return`<div class="eitem ${e.status}">
+      <div class="ehead" onclick="document.getElementById('eb-${e.id}').classList.toggle('open')">
+        <span class="efrom">${e.from}</span>
+        <span class="edate">${fmtD(e.date)}</span>
+        <span class="ebadge ${bc}">${bl}</span>
+      </div>
+      <div class="ebody" id="eb-${e.id}">
+        <div class="esubject">${e.subject}</div>
+        <div class="esnip">${(e.snippet||'').slice(0,250)}</div>
+        ${atts?`<div class="eatts">${atts}</div>`:''}
+        <div class="eacts">
+          ${e.status!=='done'?`<button class="ebtn primary" onclick="processEmail('${e.id}')">⚡ Extract Load</button>`:''}
+          <button class="ebtn" onclick="emails.find(x=>x.id==='${e.id}')&&(emails.find(x=>x.id==='${e.id}').status='skipped',renderEmails())">Skip</button>
+          <button class="ebtn" onclick="emails=emails.filter(x=>x.id!=='${e.id}');renderEmails()">Remove</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fmtD(d){try{return new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}catch(e){return d?.slice(0,16)||'';}}
+
+function drvOpts(sel){
+  const g={};DRIVERS.forEach(d=>{if(!g[d.d])g[d.d]=[];g[d.d].push(d);});
+  let h='<option value="">— Assign Driver —</option>';
+  Object.entries(g).forEach(([grp,drvs])=>{h+=`<optgroup label="${grp}">`;drvs.forEach(d=>{h+=`<option value='${JSON.stringify({name:d.name,truck:d.truck})}' ${sel===d.name?'selected':''}>${d.name} (#${d.truck})</option>`;});h+='</optgroup>';});
+  return h;
+}
+
+function renderLoads(){
+  const filtered=lFilter==='all'?loads:loads.filter(l=>l.status===lFilter);
+  const board=document.getElementById('load-board');
+  document.getElementById('load-count').textContent=loads.length+' load'+(loads.length!==1?'s':'');
+  if(!filtered.length){board.innerHTML=`<div class="empty">${loads.length===0?'No loads yet — scan inbox to create loads automatically':'No loads match this filter'}</div>`;return;}
+  board.innerHTML=filtered.map(load=>{
+    const stops=(load.stops||[]).map(s=>`<div class="lc-stop"><span class="stag ${s.type==='PU'?'tag-pu':'tag-del'}">${s.type}</span><div class="stop-info"><div style="font-weight:600;color:#f9fafb;margin-bottom:2px;">${s.date||''} ${s.timeWindow?'@ '+s.timeWindow:''}</div><div style="font-weight:500;">${s.company||''}</div><div style="color:#9ca3af;">${s.address||''}, ${s.city||''} ${s.state||''} ${s.zip||''}</div>${s.reference?`<div style="color:#6b7280;font-size:11px;">Ref: ${s.reference}</div>`:''}</div></div>`).join('');
+    const badge=load.status==='sent'?'<span style="background:#0a1a2e;color:#60a5fa;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;">✓ Sent</span>':load.status==='assigned'?'<span style="background:#0f2d1a;color:#4ade80;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;">Assigned</span>':'<span style="background:#3d2900;color:#f4a935;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;">Unassigned</span>';
+    return`<div class="load-card ${load.status}">
+      <div class="lc-head">
+        <span class="lc-num">Load # ${load.loadNumber||'—'}</span>
+        <span class="lc-broker">${load.broker||'Unknown Broker'}</span>
+        ${load.rate?`<span style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#4ade80;">$${Number(load.rate).toLocaleString()}</span>`:''}
+        ${badge}
+      </div>
+      <div class="lc-body">
+        <div style="display:flex;flex-direction:column;gap:8px;">${stops||'<div style="color:#6b7280;font-size:13px;">No stop details extracted</div>'}</div>
+        ${load.emailNotes?`<div class="notes-box"><strong style="color:#d1d5db;display:block;margin-bottom:4px;">📧 Email Notes</strong>${load.emailNotes}</div>`:''}
+        ${load.specialInstructions?`<div style="background:#2d1f00;border:1px solid #f4a935;border-radius:8px;padding:10px 14px;font-size:13px;color:#fbbf24;">⚠ ${load.specialInstructions}</div>`:''}
+        <div class="lc-actions">
+          <select class="drv-sel" id="drv-${load.id}">${drvOpts(load.assignedDriver?.name)}</select>
+          <button class="assign-btn" onclick="assignDrv('${load.id}')">Assign</button>
+          <button class="msg-btn" onclick="openMsg('${load.id}')" ${!load.assignedDriver?'disabled':''}>📱 Send Message</button>
+          <button class="btn-red" onclick="if(confirm('Remove this load?')){loads=loads.filter(l=>l.id!=='${load.id}');renderLoads();}" style="padding:9px 14px;font-size:13px;">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function assignDrv(id){
+  const sel=document.getElementById('drv-'+id);
+  if(!sel?.value){toast('Select a driver first');return;}
+  const drv=JSON.parse(sel.value);
+  const load=loads.find(l=>l.id===id);if(!load)return;
+  load.assignedDriver=drv;load.status='assigned';
+  renderLoads();toast('Assigned to '+drv.name);
+}
+
+function clearLoads(){if(!confirm('Clear all loads?'))return;loads=[];renderLoads();}
+function clearEmails(){emails=[];renderEmails();}
+
+async function openMsg(id){
+  const load=loads.find(l=>l.id===id);
+  if(!load?.assignedDriver){toast('Assign a driver first');return;}
+  currentMsgId=id;
+  document.getElementById('modal-title').textContent='Driver Message — Load #'+(load.loadNumber||'?');
+  document.getElementById('modal-driver').textContent=load.assignedDriver.name+' · Truck #'+load.assignedDriver.truck;
+  document.getElementById('modal-notes').value=load.customNotes||'';
+  document.getElementById('modal-bg').classList.add('on');
+  await genMsg(load);
+}
+
+async function genMsg(load){
+  const out=document.getElementById('modal-msg');
+  out.className='msg-out loading';out.innerHTML='<span class="spinner"></span> Building driver message...';
+  try{
+    const notes=load.customNotes||document.getElementById('modal-notes').value||'';
+    const r=await fetch('/generate-message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({load,driver:load.assignedDriver,notes})});
+    const data=await r.json();
+    currentMsgText=data.message||'Error generating message';
+    out.className='msg-out';out.textContent=currentMsgText;
+  }catch(e){out.className='msg-out';out.textContent='Error: '+e.message;}
+}
+
+function regenMsg(){const l=loads.find(x=>x.id===currentMsgId);if(l){l.customNotes=document.getElementById('modal-notes').value;genMsg(l);}}
+function copyMsg(){
+  navigator.clipboard.writeText(currentMsgText).then(()=>toast('Message copied!')).catch(()=>{
+    const t=document.createElement('textarea');t.value=currentMsgText;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);toast('Message copied!');
+  });
+}
+function markSent(){const l=loads.find(x=>x.id===currentMsgId);if(l){l.status='sent';renderLoads();closeModal();toast('Marked as sent!');}}
+function closeModal(){document.getElementById('modal-bg').classList.remove('on');currentMsgId=null;}
+
+function showPage(p,btn){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('on'));
+  document.getElementById('page-'+p).classList.add('on');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+}
+
+function updateStats(){
+  document.getElementById('st-found').textContent=stats.found;
+  document.getElementById('st-proc').textContent=stats.proc;
+  document.getElementById('st-loads').textContent=stats.loads;
+  document.getElementById('st-fail').textContent=stats.fail;
+}
+
+function log(type,msg){
+  const box=document.getElementById('log-box');
+  const t=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const colors={info:'#9ca3af',success:'#4ade80',warn:'#f4a935',error:'#f87171'};
+  const div=document.createElement('div');
+  div.innerHTML=`<span style="color:#4a5570;">[${t}]</span> <span style="color:${colors[type]||'#9ca3af'};">${msg}</span>`;
+  box.appendChild(div);box.scrollTop=box.scrollHeight;
+}
+
+function toast(msg,type){
+  const t=document.createElement('div');
+  t.className='toast'+(type==='err'?' err':'');
+  t.textContent=msg;document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},2500);
+}
+
+// Check if just connected
+const params=new URLSearchParams(window.location.search);
+if(params.get('connected')==='true'){
+  window.history.replaceState({},'','/');
+  toast('Gmail connected successfully!');
+}
+
+checkStatus();
+</script>
+</body>
+</html>
