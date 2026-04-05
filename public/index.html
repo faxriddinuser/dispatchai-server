@@ -1192,7 +1192,7 @@ const BROKER_AVAILABLE = [
 function generateAIPicks() {
   const container = document.getElementById('ai-picks-container');
   container.innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af;"><span class="spinner"></span>Analyzing fleet positions and gross gaps...</div>';
-  setTimeout(() => {
+  setTimeout(async () => {
     const ready = FLEET.filter(t => t.status === 'Ready' || t.status === 'Dhding');
     const eta = FLEET.filter(t => t.status === 'ETA' || t.status === 'Unloading');
     let html = '';
@@ -1227,9 +1227,9 @@ function generateAIPicks() {
 
 async function refreshBrokerLoads() {
   const c = document.getElementById('broker-loads');
-  c.innerHTML = '<div style="text-align:center;padding:14px;color:#9ca3af;"><span class="spinner"></span>Fetching available loads...</div>';
-  setTimeout(() => {
-    // Enrich with real miles from Google Maps
+  c.innerHTML = '<div style="text-align:center;padding:14px;color:#9ca3af;"><span class="spinner"></span>Fetching real miles from Google Maps...</div>';
+  // Enrich with real miles from Google Maps
+  try {
     const enriched = await Promise.all(BROKER_AVAILABLE.map(async l => {
       const parts = l.route.split('→');
       if (parts.length === 2) {
@@ -1249,7 +1249,10 @@ async function refreshBrokerLoads() {
         <div style="text-align:right;flex-shrink:0;margin-right:8px;"><div class="ai-load-rate">$${l.rate.toLocaleString()}</div><div class="ai-load-rpm" style="color:${l.rpm>=2.5?'#4ade80':'#f87171'};">$${l.rpm.toFixed(2)}/mi</div></div>
         <button class="btn" onclick="bookBrokerLoad('${l.id}')" style="font-size:11px;padding:6px 12px;">Book</button>
       </div>`).join('');
-  }, 800);
+  } catch(e) {
+    console.error('Broker loads error:', e);
+    c.innerHTML = '<div style="text-align:center;padding:14px;color:#f87171;">Failed to load — check connection</div>';
+  }
 }
 
 async function bookBrokerLoad(id) {
