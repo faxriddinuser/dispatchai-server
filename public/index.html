@@ -3,157 +3,182 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>DispatchAI — Transportation Management System</title>
+<title>DispatchAI — TMS</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Barlow',sans-serif;background:#0e1117;color:#f0f2f8;min-height:100vh;overflow-x:hidden;}
+body{font-family:'Barlow',sans-serif;background:#0e1117;color:#f0f2f8;min-height:100vh;}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#0e1117 0%,#1a1f2e 100%);}
+.login-box{background:#1a2035;border:1px solid #2d3748;border-radius:16px;padding:36px 40px;width:100%;max-width:420px;}
+.login-logo{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:700;color:#f4a935;letter-spacing:2px;text-align:center;margin-bottom:4px;}
+.login-logo span{color:#fff;}
+.login-sub{font-size:12px;color:#6b7490;text-align:center;margin-bottom:28px;letter-spacing:1px;}
+.login-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;color:#9ca3af;text-transform:uppercase;margin-bottom:6px;}
+.login-inp{width:100%;background:#111827;border:1.5px solid #374151;border-radius:8px;color:#f9fafb;font-family:'Barlow',sans-serif;font-size:14px;padding:12px 14px;outline:none;transition:border-color .15s;margin-bottom:14px;}
+.login-inp:focus{border-color:#f4a935;}
+.login-btn{width:100%;background:#f4a935;border:none;border-radius:8px;color:#111827;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;padding:13px;cursor:pointer;text-transform:uppercase;transition:background .15s;margin-top:4px;}
+.login-btn:hover{background:#fbbf24;}
+.login-err{color:#f87171;font-size:12px;text-align:center;margin-top:8px;min-height:18px;}
+.demo-creds{background:#111827;border:1px solid #2d3748;border-radius:8px;padding:12px 14px;margin-top:18px;font-size:11px;color:#6b7490;line-height:1.9;}
+.demo-creds strong{color:#9ca3af;}
 
 /* HEADER */
-.header{background:#111827;border-bottom:2px solid #f4a935;padding:10px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;flex-wrap:wrap;}
-.logo{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:#f4a935;letter-spacing:1px;white-space:nowrap;}
+.header{background:#111827;border-bottom:2px solid #f4a935;padding:10px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;flex-wrap:wrap;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:#f4a935;letter-spacing:1px;white-space:nowrap;}
 .logo span{color:#fff;}
-.logo-sub{font-size:11px;color:#6b7490;border-left:1px solid #374151;padding-left:12px;}
-.live-badge{background:#0f2d1a;border:1px solid #4ade80;border-radius:20px;font-size:11px;font-weight:700;color:#4ade80;padding:3px 10px;display:flex;align-items:center;gap:5px;}
-.dot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulse 1.5s infinite;}
+.user-badge{background:#1f2937;border:1px solid #374151;border-radius:20px;font-size:11px;font-weight:600;padding:4px 12px;display:flex;align-items:center;gap:6px;}
+.role-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;}
+.role-manager{background:#3d2900;color:#f4a935;}
+.role-dispatch{background:#0a1f3d;color:#60a5fa;}
+.role-fleet{background:#0f2d1a;color:#4ade80;}
+.role-update{background:#1a0a2e;color:#a78bfa;}
+.role-accounting{background:#2d1a00;color:#fb923c;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulse 1.5s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
-.header-nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap;}
-.hnav{background:#1f2937;border:1.5px solid #374151;color:#d1d5db;font-size:11px;font-weight:600;padding:7px 13px;border-radius:7px;cursor:pointer;transition:all .15s;white-space:nowrap;}
-.hnav.active{background:#f4a935;border-color:#f4a935;color:#111827;}
-.hnav:hover:not(.active){background:#374151;color:#fff;}
+.hnav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap;}
+.nb{background:#1f2937;border:1.5px solid #374151;color:#d1d5db;font-size:11px;font-weight:600;padding:6px 12px;border-radius:7px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.nb.active{background:#f4a935;border-color:#f4a935;color:#111827;}
+.nb:hover:not(.active){background:#374151;color:#fff;}
+.nb.hidden{display:none;}
+.logout-btn{background:#2d0f0f;border:1px solid #7f1d1d;border-radius:7px;color:#f87171;font-size:11px;padding:6px 12px;cursor:pointer;white-space:nowrap;}
+.logout-btn:hover{background:#450f0f;}
 
-/* LAYOUT */
-.content{padding:16px 20px;max-width:1800px;margin:0 auto;}
+/* CONTENT */
+.content{padding:14px 18px;max-width:1800px;margin:0 auto;}
 .page{display:none;}.page.on{display:block;}
 
 /* PANELS */
-.panel{background:#1a2035;border:1px solid #2d3748;border-radius:10px;padding:16px 18px;margin-bottom:16px;}
-.ptitle{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;color:#f4a935;margin-bottom:14px;text-transform:uppercase;border-bottom:1px solid #2d3748;padding-bottom:8px;display:flex;align-items:center;gap:10px;}
-
-/* INPUTS */
+.panel{background:#1a2035;border:1px solid #2d3748;border-radius:10px;padding:14px 16px;margin-bottom:14px;}
+.ptitle{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;color:#f4a935;margin-bottom:12px;text-transform:uppercase;border-bottom:1px solid #2d3748;padding-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .inp{background:#111827;border:1.5px solid #374151;border-radius:7px;color:#f9fafb;font-family:'Barlow',sans-serif;font-size:13px;padding:8px 12px;outline:none;transition:border-color .15s;}
 .inp:focus{border-color:#f4a935;}
 .inp::placeholder{color:#6b7280;}
 select.inp option{background:#111827;}
-
-/* BUTTONS */
-.btn{background:#f4a935;border:none;border-radius:7px;color:#111827;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;padding:9px 18px;cursor:pointer;text-transform:uppercase;transition:background .15s;white-space:nowrap;}
+.lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;color:#9ca3af;text-transform:uppercase;margin-bottom:5px;}
+.btn{background:#f4a935;border:none;border-radius:7px;color:#111827;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;padding:9px 18px;cursor:pointer;text-transform:uppercase;transition:background .15s;white-space:nowrap;}
 .btn:hover{background:#fbbf24;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
 .btn-sec{background:#1f2937;border:1.5px solid #4b5563;border-radius:7px;color:#d1d5db;font-size:12px;padding:8px 14px;cursor:pointer;transition:all .15s;white-space:nowrap;}
 .btn-sec:hover{background:#374151;color:#fff;}
-.btn-sm{background:#1f2937;border:1px solid #374151;border-radius:5px;color:#d1d5db;font-size:11px;padding:4px 10px;cursor:pointer;transition:all .15s;}
+.btn-sm{background:#1f2937;border:1px solid #374151;border-radius:5px;color:#d1d5db;font-size:11px;padding:3px 9px;cursor:pointer;transition:all .15s;}
 .btn-sm:hover{background:#374151;}
+.btn-red{background:#2d0f0f;border:1.5px solid #7f1d1d;border-radius:7px;color:#f87171;font-size:12px;padding:8px 14px;cursor:pointer;}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid #374151;border-top-color:#f4a935;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-/* STATS ROW */
-.stats-row{display:grid;gap:10px;margin-bottom:14px;}
-.stats-4{grid-template-columns:repeat(4,1fr);}
-.stats-6{grid-template-columns:repeat(6,1fr);}
+/* STATS */
+.stats-row{display:grid;gap:8px;margin-bottom:12px;}
+.s4{grid-template-columns:repeat(4,1fr);}
+.s6{grid-template-columns:repeat(6,1fr);}
 .stat-card{background:#111827;border:1.5px solid #2d3748;border-radius:9px;padding:12px;text-align:center;}
 .stat-val{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;color:#f4a935;}
 .stat-lbl{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;}
 
-/* FLEET BOARD TABLE */
+/* FLEET TABLE */
 .tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid #2d3748;}
-.fleet-tbl{border-collapse:collapse;width:100%;min-width:1100px;font-size:12px;}
-.fleet-tbl th{background:#111827;color:#9ca3af;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:9px 10px;border-bottom:2px solid #2d3748;white-space:nowrap;text-align:left;}
-.fleet-tbl td{padding:6px 10px;border-bottom:1px solid #1a2035;vertical-align:middle;}
-.fleet-tbl tr:hover td{background:rgba(255,255,255,.02);}
-
-/* ROW COLORS */
-.row-home td{background:#1a1020 !important;}
-.row-home td:first-child{border-left:3px solid #7f1d1d;}
+.ftbl{border-collapse:collapse;width:100%;min-width:1100px;font-size:12px;}
+.ftbl th{background:#111827;color:#9ca3af;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:8px 10px;border-bottom:2px solid #2d3748;white-space:nowrap;text-align:left;}
+.ftbl td{padding:6px 10px;border-bottom:1px solid #1a2035;vertical-align:middle;}
+.ftbl tr:hover td{background:rgba(255,255,255,.02);}
+.row-home td{background:#1a1020 !important;}.row-home td:first-child{border-left:3px solid #7f1d1d;}
 .row-active td:first-child{border-left:3px solid #1e3a5f;}
 .row-ready td:first-child{border-left:3px solid #166534;}
-
-/* DRIVER COLORS */
-.drv-ily{color:#f0f2f8;font-weight:500;}
-.drv-box{color:#60a5fa;font-weight:600;}
-
-/* STATUS BADGE */
-.status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px;white-space:nowrap;}
-.s-ready{background:#0f2d1a;color:#4ade80;}
-.s-eta{background:#0a1a2e;color:#60a5fa;}
-.s-pu{background:#3d2900;color:#f4a935;}
-.s-home{background:#2d0f0f;color:#f87171;}
-.s-oos{background:#2d0f0f;color:#f87171;}
-.s-unloading{background:#1a1a00;color:#facc15;}
-.s-sleeping{background:#1a0a2e;color:#a78bfa;}
-.s-dhding{background:#1a1a1a;color:#9ca3af;}
-.s-hold{background:#2d1a00;color:#fb923c;}
-.s-covered{background:#0f2d1a;color:#4ade80;}
-.s-puchecked{background:#0a2e1a;color:#34d399;}
-.s-trlmove{background:#0a1a2e;color:#93c5fd;}
-.s-fired{background:#450f0f;color:#fca5a5;}
-.s-dot{background:#2d1500;color:#fdba74;}
-.s-getready{background:#1a2d00;color:#86efac;}
-.s-waiting{background:#1a1a00;color:#fde047;}
-.s-puproblem{background:#3d0f00;color:#fca5a5;}
-
-/* PM BADGE */
-.pm-soon{background:#3d2900;color:#f4a935;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;}
-.pm-overdue{background:#450f0f;color:#f87171;font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;animation:blink 1s infinite;}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:.5;}}
-
-/* BOOKED TRAILER */
-.trl-booked{background:#7f1d1d;color:#fca5a5;font-weight:700;padding:2px 8px;border-radius:4px;font-size:11px;}
-.trl-normal{color:#d1d5db;}
-
-/* OVERDUE LOAD */
+.drv-ily{color:#f0f2f8;font-weight:500;}.drv-box{color:#60a5fa;font-weight:600;}
+.sbadge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;}
+.s-ready{background:#0f2d1a;color:#4ade80;}.s-eta{background:#0a1a2e;color:#60a5fa;}.s-pu{background:#3d2900;color:#f4a935;}
+.s-home{background:#2d0f0f;color:#f87171;}.s-oos{background:#2d0f0f;color:#f87171;}.s-unloading{background:#1a1a00;color:#facc15;}
+.s-sleeping{background:#1a0a2e;color:#a78bfa;}.s-dhding{background:#1a1a1a;color:#9ca3af;}.s-hold{background:#2d1a00;color:#fb923c;}
+.s-covered{background:#0f2d1a;color:#4ade80;}.s-puchecked{background:#0a2e1a;color:#34d399;}.s-trlmove{background:#0a1a2e;color:#93c5fd;}
+.s-fired{background:#450f0f;color:#fca5a5;}.s-dot{background:#2d1500;color:#fdba74;}.s-getready{background:#1a2d00;color:#86efac;}
+.s-waiting{background:#1a1a00;color:#fde047;}.s-puproblem{background:#3d0f00;color:#fca5a5;}
+.pm-soon{background:#3d2900;color:#f4a935;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;}
+.pm-overdue{background:#450f0f;color:#f87171;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.4;}}
+.trl-booked{background:#7f1d1d;color:#fca5a5;font-weight:700;padding:2px 7px;border-radius:4px;font-size:11px;}
 .load-overdue{color:#f87171;font-weight:700;}
-.load-normal{color:#d1d5db;}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center;}
+.fpill{background:#1f2937;border:1.5px solid #4b5563;border-radius:20px;color:#d1d5db;font-size:11px;font-weight:600;padding:4px 13px;cursor:pointer;transition:all .15s;}
+.fpill.active{background:#3d2900;border-color:#f4a935;color:#fbbf24;}
 
-/* FILTER ROW */
-.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
-.filter-pill{background:#1f2937;border:1.5px solid #4b5563;border-radius:20px;color:#d1d5db;font-size:11px;font-weight:600;padding:5px 14px;cursor:pointer;transition:all .15s;}
-.filter-pill.active{background:#3d2900;border-color:#f4a935;color:#fbbf24;}
-
-/* GROSS SHEET */
-.gs-wrap{overflow-x:auto;}
-.gs-tbl{border-collapse:collapse;width:100%;min-width:1200px;font-size:12px;}
-.gs-tbl th{background:#111827;color:#9ca3af;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:8px 8px;border:1px solid #2d3748;text-align:center;}
-.gs-tbl td{border:1px solid #1e2535;padding:4px 6px;vertical-align:middle;}
-.gs-dispatcher-row td{background:#0e1525;color:#f4a935;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;padding:8px 10px;}
-.gs-driver-name{background:#1a2035;color:#f0f2f8;font-size:11px;font-weight:600;white-space:nowrap;}
-.gs-truck{background:#111827;color:#9ca3af;text-align:center;font-size:11px;}
-.gs-day{background:#111827;padding:2px;}
-.gs-day input.gi{width:100%;background:#0a0d14;border:1px solid #2d3748;border-radius:4px;color:#f9fafb;font-size:11px;padding:3px 5px;outline:none;text-align:center;}
-.gs-day input.gi:focus{border-color:#f4a935;}
-.gs-day input.mi{width:100%;background:#0a0d14;border:1px solid #1e2535;border-radius:4px;color:#6b7280;font-size:10px;padding:2px 4px;outline:none;text-align:center;margin-top:2px;}
-.gs-gross{background:#0a1a10;color:#4ade80;font-weight:700;text-align:right;padding:4px 8px;}
-.gs-ou-pos{background:#0a1a10;color:#4ade80;font-weight:700;text-align:right;padding:4px 8px;}
-.gs-ou-neg{background:#1a0a0a;color:#f87171;font-weight:700;text-align:right;padding:4px 8px;}
-.gs-ou-zero{background:#111827;color:#9ca3af;text-align:right;padding:4px 8px;}
-.gs-rpm{background:#111827;color:#e5e7eb;text-align:center;padding:4px 8px;}
-.gs-miles{background:#0e1525;color:#9ca3af;text-align:right;padding:4px 8px;}
-.gs-home-cell{background:#1a0a0a;}
-.gs-home-cell input.gi{color:#f87171 !important;border-color:#7f1d1d !important;}
-.gs-reset-cell input.gi{color:#a78bfa !important;}
-.gs-target-bar{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
-.target-info{background:#111827;border:1.5px solid #2d3748;border-radius:8px;padding:8px 14px;font-size:12px;color:#9ca3af;}
-.target-val{color:#f4a935;font-weight:700;}
+/* DEDICATED LANES */
+.lane-tbl{border-collapse:collapse;width:100%;font-size:12px;}
+.lane-tbl td,.lane-tbl th{padding:7px 12px;border:1px solid #2d3748;vertical-align:middle;}
+.lane-tbl th{background:#111827;color:#9ca3af;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
+.lane-date-row td{background:#f4a935;color:#111827;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;padding:8px 12px;}
+.lane-row td{background:#0a2035;}
+.lane-route{color:#22d3ee;font-weight:600;}
+.lane-noload td{background:#3d2900;}
+.lane-noload .lane-route{color:#f4a935;}
+.lane-covered td{background:#0f2d1a;}
+.lane-status{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;}
+.ls-upcoming{background:#0a1a2e;color:#60a5fa;}.ls-covered{background:#0f2d1a;color:#4ade80;}
+.ls-noload{background:#3d2900;color:#f4a935;}.ls-completed{background:#1a1a1a;color:#9ca3af;}
+.lane-inp{background:#0d1117;border:1px solid #374151;border-radius:5px;color:#f9fafb;font-size:11px;padding:4px 8px;outline:none;width:100%;}
+.lane-inp:focus{border-color:#f4a935;}
 
 /* LOAD BOARD */
-.load-cards{display:flex;flex-direction:column;gap:10px;}
-.load-card{background:#111827;border:1.5px solid #2d3748;border-radius:10px;overflow:hidden;}
+.load-card{background:#111827;border:1.5px solid #2d3748;border-radius:10px;overflow:hidden;margin-bottom:10px;}
 .load-card.unassigned{border-left:4px solid #f4a935;}
 .load-card.assigned{border-left:4px solid #4ade80;}
 .load-card.sent{border-left:4px solid #60a5fa;}
-.lc-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a2035;}
+.lc-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a2035;flex-wrap:wrap;}
 .lc-num{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#f4a935;}
 .lc-broker{font-size:12px;color:#9ca3af;flex:1;}
 .lc-rate{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:#4ade80;}
 .lc-body{padding:12px 14px;display:flex;flex-direction:column;gap:8px;}
 .lc-stop{display:flex;gap:8px;font-size:12px;}
 .stag{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;flex-shrink:0;}
-.tag-pu{background:#3d2900;color:#f4a935;}
-.tag-del{background:#0a1f3d;color:#60a5fa;}
+.tag-pu{background:#3d2900;color:#f4a935;}.tag-del{background:#0a1f3d;color:#60a5fa;}
 .stop-info{color:#d1d5db;line-height:1.5;}
 .lc-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-top:8px;border-top:1px solid #1e2535;}
 .drv-sel{background:#1a1f2e;border:1.5px solid #374151;border-radius:7px;color:#f9fafb;font-family:'Barlow',sans-serif;font-size:12px;padding:7px 10px;outline:none;cursor:pointer;flex:1;min-width:160px;}
 .drv-sel option{background:#111827;}
+.ai-badge{background:#1a0a2e;border:1px solid #7c3aed;border-radius:20px;font-size:10px;font-weight:700;color:#a78bfa;padding:2px 10px;display:inline-flex;align-items:center;gap:4px;}
 
-/* EMAIL SCANNER */
-.email-list{display:flex;flex-direction:column;gap:8px;max-height:450px;overflow-y:auto;}
+/* AI RECOMMENDATIONS */
+.ai-card{background:#111827;border:1.5px solid #7c3aed;border-radius:10px;padding:14px;margin-bottom:10px;}
+.ai-card-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:#a78bfa;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.ai-reason{font-size:12px;color:#9ca3af;line-height:1.6;margin-bottom:8px;}
+.ai-loads{display:flex;flex-direction:column;gap:6px;}
+.ai-load-item{background:#1a2035;border:1px solid #374151;border-radius:7px;padding:8px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ai-load-route{font-size:12px;font-weight:600;color:#e5e7eb;flex:1;}
+.ai-load-rate{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:#4ade80;}
+.ai-load-rpm{font-size:11px;color:#9ca3af;}
+
+/* GROSS SHEET */
+.gs-wrap{overflow-x:auto;}
+.gs-tbl{border-collapse:collapse;width:100%;min-width:1100px;font-size:12px;}
+.gs-tbl th{background:#111827;color:#9ca3af;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:7px 8px;border:1px solid #2d3748;text-align:center;}
+.gs-tbl td{border:1px solid #1e2535;padding:3px 5px;vertical-align:middle;}
+.gs-disp-row td{background:#0e1525;color:#f4a935;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;padding:7px 10px;}
+.gs-drv{background:#1a2035;color:#f0f2f8;font-size:11px;font-weight:600;}
+.gs-truck{background:#111827;color:#9ca3af;text-align:center;font-size:11px;}
+.gs-day{background:#111827;padding:2px;}
+.gs-day .gi{width:100%;background:#0a0d14;border:1px solid #2d3748;border-radius:4px;color:#f9fafb;font-size:11px;padding:3px 4px;outline:none;text-align:center;}
+.gs-day .gi:focus{border-color:#f4a935;}
+.gs-day .mi{width:100%;background:#0a0d14;border:1px solid #1e2535;border-radius:4px;color:#6b7280;font-size:10px;padding:2px 3px;outline:none;text-align:center;margin-top:2px;}
+.gs-gross{background:#0a1a10;color:#4ade80;font-weight:700;text-align:right;padding:4px 7px;}
+.gs-ou-pos{background:#0a1a10;color:#4ade80;font-weight:700;text-align:right;padding:4px 7px;}
+.gs-ou-neg{background:#1a0a0a;color:#f87171;font-weight:700;text-align:right;padding:4px 7px;}
+.gs-ou-zero{background:#111827;color:#9ca3af;text-align:right;padding:4px 7px;}
+.gs-rpm{background:#111827;color:#e5e7eb;text-align:center;padding:4px 7px;}
+.gs-miles{background:#0e1525;color:#9ca3af;text-align:right;padding:4px 7px;}
+.gs-home-cell input.gi{color:#f87171!important;border-color:#7f1d1d!important;}
+.gs-reset-cell input.gi{color:#a78bfa!important;}
+
+/* ACTIVITY LOG */
+.activity-entry{display:flex;gap:12px;padding:10px 14px;border-bottom:1px solid #1e2535;font-size:12px;align-items:flex-start;}
+.activity-entry:last-child{border-bottom:none;}
+.act-time{color:#6b7490;white-space:nowrap;font-size:11px;flex-shrink:0;font-family:'Courier New',monospace;}
+.act-user{font-weight:600;color:#f4a935;flex-shrink:0;}
+.act-role{font-size:10px;font-weight:700;padding:1px 8px;border-radius:20px;flex-shrink:0;}
+.act-action{color:#d1d5db;flex:1;}
+.act-detail{color:#9ca3af;font-size:11px;margin-top:2px;}
+
+/* EMAIL */
+.email-list{display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;}
 .eitem{background:#111827;border:1.5px solid #2d3748;border-radius:9px;overflow:hidden;}
 .eitem.done{border-color:#4ade80;}.eitem.processing{border-color:#f4a935;}.eitem.failed{border-color:#f87171;}
 .ehead{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;}
@@ -163,348 +188,376 @@ select.inp option{background:#111827;}
 .eb-new{background:#3d2900;color:#f4a935;}.eb-done{background:#0f2d1a;color:#4ade80;}.eb-proc{background:#1e1500;color:#f4a935;}.eb-fail{background:#2d0f0f;color:#f87171;}
 .ebody{display:none;flex-direction:column;gap:8px;padding:0 14px 12px;}
 .ebody.open{display:flex;}
-
-/* LOG */
-.log-box{background:#0a0d14;border:1.5px solid #2d3748;border-radius:8px;padding:12px;font-family:'Courier New',monospace;font-size:11px;color:#6b7280;max-height:160px;overflow-y:auto;line-height:1.8;}
-
-/* MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:200;padding:20px;}
-.modal-bg.on{display:flex;}
-.modal{background:#1a2035;border:1.5px solid #374151;border-radius:12px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;}
-.modal-head{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid #374151;background:#111827;border-radius:12px 12px 0 0;}
-.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#f4a935;flex:1;}
-.close-btn{background:none;border:none;color:#6b7280;font-size:24px;cursor:pointer;line-height:1;}
-.close-btn:hover{color:#f87171;}
-.modal-body{padding:18px;display:flex;flex-direction:column;gap:14px;}
-.msg-out{background:#0a0d14;border:1.5px solid #374151;border-radius:8px;padding:16px;font-family:'Courier New',monospace;font-size:13px;line-height:1.9;color:#f0f2f8;white-space:pre-wrap;min-height:180px;}
-.msg-out.loading{color:#6b7280;font-style:italic;font-family:'Barlow',sans-serif;}
-.lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;color:#9ca3af;text-transform:uppercase;margin-bottom:6px;}
-.spinner{display:inline-block;width:13px;height:13px;border:2px solid #374151;border-top-color:#f4a935;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-/* TOKEN CONNECT */
-.token-box{background:#111827;border:2px solid #f4a935;border-radius:10px;padding:16px;}
-.conn-ok{background:#0f2d1a;border:1px solid #166534;border-radius:10px;padding:16px;text-align:center;}
-
-/* TOAST */
-.toast{position:fixed;bottom:24px;right:24px;background:#f4a935;color:#111;padding:10px 20px;border-radius:8px;font-weight:700;font-size:13px;z-index:9999;transition:opacity .3s;}
-.toast.err{background:#f87171;color:#fff;}
+.log-box{background:#0a0d14;border:1.5px solid #2d3748;border-radius:8px;padding:12px;font-family:'Courier New',monospace;font-size:11px;color:#6b7280;max-height:150px;overflow-y:auto;line-height:1.8;}
 
 /* RATE INTEL */
 .rate-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.rate-result{background:#111827;border:1.5px solid #374151;border-radius:10px;padding:16px;display:none;}
+.rate-result{background:#111827;border:1.5px solid #374151;border-radius:10px;padding:14px;display:none;}
 .rate-result.on{display:block;}
-.rate-big{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:700;color:#4ade80;}
+.rate-big{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:700;color:#4ade80;}
 .rate-min{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:#f87171;}
-.rate-adj{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
-.rate-adj-item{display:flex;justify-content:space-between;font-size:13px;padding:6px 10px;background:#1a2035;border-radius:6px;}
+.rate-adj-item{display:flex;justify-content:space-between;font-size:12px;padding:5px 10px;background:#1a2035;border-radius:6px;margin-bottom:4px;}
 .rate-adj-item.pos{color:#4ade80;}.rate-adj-item.neg{color:#f87171;}.rate-adj-item.base{color:#f4a935;}
 
-/* GRID UTILS */
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+.modal-bg.on{display:flex;}
+.modal{background:#1a2035;border:1.5px solid #374151;border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
+.modal-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid #374151;background:#111827;border-radius:12px 12px 0 0;}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#f4a935;flex:1;}
+.close-btn{background:none;border:none;color:#6b7280;font-size:24px;cursor:pointer;line-height:1;}
+.close-btn:hover{color:#f87171;}
+.modal-body{padding:18px;display:flex;flex-direction:column;gap:12px;}
+.msg-out{background:#0a0d14;border:1.5px solid #374151;border-radius:8px;padding:14px;font-family:'Courier New',monospace;font-size:13px;line-height:1.8;color:#f0f2f8;white-space:pre-wrap;min-height:180px;}
+.msg-out.loading{color:#6b7280;font-style:italic;font-family:'Barlow',sans-serif;}
+.token-box{background:#111827;border:2px solid #f4a935;border-radius:10px;padding:14px;}
+.conn-ok{background:#0f2d1a;border:1px solid #166534;border-radius:10px;padding:14px;text-align:center;}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:#f4a935;color:#111;padding:10px 20px;border-radius:8px;font-weight:700;font-size:13px;z-index:9999;transition:opacity .3s;box-shadow:0 4px 20px rgba(0,0,0,.4);}
+.toast.err{background:#f87171;color:#fff;}
+
+/* GRID */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-
-/* RESPONSIVE */
-@media(max-width:900px){.rate-form{grid-template-columns:1fr;}.g2,.g3{grid-template-columns:1fr;}.stats-4,.stats-6{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:900px){.g2,.g3,.rate-form{grid-template-columns:1fr;}.s4,.s6{grid-template-columns:repeat(2,1fr);}}
 </style>
 </head>
 <body>
 
+<!-- LOGIN PAGE -->
+<div id="login-page">
+<div class="login-wrap">
+<div class="login-box">
+  <div class="login-logo">DISPATCH<span>AI</span></div>
+  <div class="login-sub">TRANSPORTATION MANAGEMENT SYSTEM</div>
+  <div class="login-lbl">Username</div>
+  <input class="login-inp" id="l-user" placeholder="Enter username" onkeydown="if(event.key==='Enter')doLogin()">
+  <div class="login-lbl">Password</div>
+  <input class="login-inp" id="l-pass" type="password" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
+  <button class="login-btn" onclick="doLogin()">Sign In</button>
+  <div class="login-err" id="l-err"></div>
+  <div class="demo-creds">
+    <strong>Demo Credentials:</strong><br>
+    manager / Manager2026! — Full access<br>
+    dispatcher / Dispatch2026! — Dispatch team<br>
+    fleet / Fleet2026! — Fleet team<br>
+    update / Update2026! — Update team<br>
+    accounting / Acct2026! — Accounting only
+  </div>
+</div>
+</div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app" style="display:none;">
+
 <div class="header">
   <div class="logo">DISPATCH<span>AI</span></div>
-  <div class="logo-sub">Transportation Management System — DEMO</div>
-  <div class="live-badge"><span class="dot"></span> Live</div>
-  <div class="header-nav">
-    <button class="hnav active" onclick="showPage('fleet',this)">🚛 Fleet Board</button>
-    <button class="hnav" onclick="showPage('gross',this)">📊 Gross Sheet</button>
-    <button class="hnav" onclick="showPage('loads',this)">📋 Load Board</button>
-    <button class="hnav" onclick="showPage('email',this)">📧 Email Scanner</button>
-    <button class="hnav" onclick="showPage('rate',this)">💰 Rate Intel</button>
+  <div class="user-badge">
+    <span class="live-dot"></span>
+    <span id="hdr-user">—</span>
+    <span class="role-badge" id="hdr-role-badge">—</span>
   </div>
+  <div class="hnav">
+    <button class="nb active" onclick="showPage('fleet',this)" id="tnav-fleet">🚛 Fleet</button>
+    <button class="nb" onclick="showPage('lanes',this)" id="tnav-lanes">🚀 Dedicated Lanes</button>
+    <button class="nb" onclick="showPage('loads',this)" id="tnav-loads">📋 Load Board</button>
+    <button class="nb" onclick="showPage('ai',this)" id="tnav-ai">🤖 AI Picks</button>
+    <button class="nb" onclick="showPage('gross',this)" id="tnav-gross">📊 Gross Sheet</button>
+    <button class="nb" onclick="showPage('email',this)" id="tnav-email">📧 Email</button>
+    <button class="nb" onclick="showPage('rate',this)" id="tnav-rate">💰 Rate Intel</button>
+    <button class="nb" onclick="showPage('activity',this)" id="tnav-activity">📝 Activity Log</button>
+  </div>
+  <button class="logout-btn" onclick="doLogout()">Sign Out</button>
 </div>
 
 <div class="content">
 
-<!-- ===== FLEET BOARD ===== -->
+<!-- FLEET BOARD -->
 <div id="page-fleet" class="page on">
-  <div class="stats-row stats-6">
-    <div class="stat-card"><div class="stat-val" id="fs-total">0</div><div class="stat-lbl">Total Trucks</div></div>
-    <div class="stat-card"><div class="stat-val" id="fs-active" style="color:#4ade80;">0</div><div class="stat-lbl">Active / Loaded</div></div>
-    <div class="stat-card"><div class="stat-val" id="fs-ready" style="color:#60a5fa;">0</div><div class="stat-lbl">Ready / Available</div></div>
-    <div class="stat-card"><div class="stat-val" id="fs-home" style="color:#f87171;">0</div><div class="stat-lbl">Home / OOS</div></div>
-    <div class="stat-card"><div class="stat-val" id="fs-pm" style="color:#fb923c;">0</div><div class="stat-lbl">PM Due</div></div>
-    <div class="stat-card"><div class="stat-val" id="fs-overdue" style="color:#f87171;">0</div><div class="stat-lbl">Overdue Loads</div></div>
+  <div class="stats-row s6">
+    <div class="stat-card"><div class="stat-val" id="fs-total">25</div><div class="stat-lbl">Total Trucks</div></div>
+    <div class="stat-card"><div class="stat-val" id="fs-active" style="color:#4ade80;">12</div><div class="stat-lbl">Active / Loaded</div></div>
+    <div class="stat-card"><div class="stat-val" id="fs-ready" style="color:#60a5fa;">4</div><div class="stat-lbl">Ready</div></div>
+    <div class="stat-card"><div class="stat-val" id="fs-home" style="color:#f87171;">7</div><div class="stat-lbl">Home / OOS</div></div>
+    <div class="stat-card"><div class="stat-val" id="fs-pm" style="color:#fb923c;">3</div><div class="stat-lbl">PM Due</div></div>
+    <div class="stat-card"><div class="stat-val" id="fs-overdue" style="color:#f87171;">1</div><div class="stat-lbl">Overdue</div></div>
   </div>
-
   <div class="panel">
-    <div class="ptitle">🚛 Live Fleet Board <span style="font-size:11px;color:#6b7490;font-weight:400;text-transform:none;margin-left:8px;">Demo data — Samsara GPS will update positions automatically</span></div>
+    <div class="ptitle">🚛 Live Fleet Board
+      <span style="font-size:11px;color:#6b7490;font-weight:400;text-transform:none;">Samsara GPS auto-updates every 5 min</span>
+      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn-sec" id="fleet-edit-btn" onclick="toggleFleetEdit()" style="display:none;font-size:11px;padding:5px 12px;">✏ Edit Mode</button>
+      </div>
+    </div>
     <div class="filter-row">
-      <span style="font-size:11px;color:#6b7490;font-weight:600;">Filter:</span>
-      <button class="filter-pill active" onclick="setFleetFilter('all',this)">All Trucks</button>
-      <button class="filter-pill" onclick="setFleetFilter('active',this)">Active</button>
-      <button class="filter-pill" onclick="setFleetFilter('ready',this)">Ready</button>
-      <button class="filter-pill" onclick="setFleetFilter('home',this)">Home / OOS</button>
-      <button class="filter-pill" onclick="setFleetFilter('pm',this)">PM Due</button>
-      <button class="filter-pill" onclick="setFleetFilter('ily',this)">ILY Only</button>
-      <button class="filter-pill" onclick="setFleetFilter('box',this)">BOX Only</button>
-      <input class="inp" id="fleet-search" placeholder="Search driver, truck, load..." style="margin-left:auto;width:220px;" oninput="renderFleet()">
+      <button class="fpill active" onclick="setFF('all',this)">All</button>
+      <button class="fpill" onclick="setFF('active',this)">Active</button>
+      <button class="fpill" onclick="setFF('ready',this)">Ready</button>
+      <button class="fpill" onclick="setFF('home',this)">Home/OOS</button>
+      <button class="fpill" onclick="setFF('pm',this)">PM Due</button>
+      <button class="fpill" onclick="setFF('ily',this)">ILY</button>
+      <button class="fpill" onclick="setFF('box',this)">BOX</button>
+      <input class="inp" id="fleet-search" placeholder="Search..." style="margin-left:auto;width:200px;font-size:12px;" oninput="renderFleet()">
     </div>
-    <div class="tbl-wrap">
-      <table class="fleet-tbl">
-        <thead>
-          <tr>
-            <th style="width:60px;">PM</th>
-            <th>Load #</th>
-            <th>Truck #</th>
-            <th>Trailer #</th>
-            <th>Driver Name</th>
-            <th>Phone</th>
-            <th>Dispatcher</th>
-            <th>Status</th>
-            <th>Location</th>
-            <th>Destination</th>
-          </tr>
-        </thead>
-        <tbody id="fleet-tbody"></tbody>
-      </table>
-    </div>
-    <div style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:#6b7490;">
-      <span><span style="display:inline-block;width:12px;height:12px;background:#60a5fa;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>BOX company driver</span>
-      <span><span style="display:inline-block;width:12px;height:12px;background:#f0f2f8;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>ILY company driver</span>
-      <span><span style="display:inline-block;width:12px;height:12px;background:#7f1d1d;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Booked trailer — cannot drop</span>
-      <span><span style="display:inline-block;width:12px;height:12px;background:#1a1020;border-radius:2px;vertical-align:middle;border-left:3px solid #7f1d1d;margin-right:4px;"></span>Home / OOS row</span>
+    <div class="tbl-wrap"><table class="ftbl"><thead><tr>
+      <th style="width:60px;">PM</th><th>Load #</th><th>Truck #</th><th>Trailer #</th>
+      <th>Driver Name</th><th>Phone</th><th>Dispatcher</th><th>Status</th>
+      <th>Location</th><th>Destination</th>
+    </tr></thead><tbody id="fleet-tbody"></tbody></table></div>
+    <div style="margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:#6b7490;">
+      <span><span style="display:inline-block;width:10px;height:10px;background:#60a5fa;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>BOX company</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:#f0f2f8;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>ILY company</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:#7f1d1d;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Booked trailer</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:#1a1020;border-radius:2px;vertical-align:middle;border-left:3px solid #7f1d1d;margin-right:4px;"></span>Home/OOS row</span>
     </div>
   </div>
 </div>
 
-<!-- ===== GROSS SHEET ===== -->
-<div id="page-gross" class="page">
-  <div class="stats-row stats-4" style="margin-bottom:14px;">
-    <div class="stat-card"><div class="stat-val" id="gs-fleet-gross">$0</div><div class="stat-lbl">Fleet Gross This Week</div></div>
-    <div class="stat-card"><div class="stat-val" id="gs-fleet-ou" style="color:#9ca3af;">$0</div><div class="stat-lbl">Fleet Over / Under</div></div>
-    <div class="stat-card"><div class="stat-val" id="gs-fleet-miles">0</div><div class="stat-lbl">Total Miles</div></div>
-    <div class="stat-card"><div class="stat-val" id="gs-avg-rpm">$0.00</div><div class="stat-lbl">Avg Rate / Mile</div></div>
+<!-- DEDICATED LANES -->
+<div id="page-lanes" class="page">
+  <div class="panel">
+    <div class="ptitle">🚀 Dedicated Lanes Board
+      <span style="font-size:11px;color:#6b7490;font-weight:400;text-transform:none;">Auto-recurring loads from dedicated broker contracts</span>
+      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="fpill active" onclick="setLaneView('all',this)">All</button>
+        <button class="fpill" onclick="setLaneView('upcoming',this)">Upcoming</button>
+        <button class="fpill" onclick="setLaneView('unassigned',this)">No Driver</button>
+        <button class="btn" id="add-lane-btn" onclick="addLaneRow()" style="font-size:11px;padding:6px 14px;display:none;">+ Add Lane</button>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="lane-tbl" id="lane-table">
+        <thead><tr>
+          <th style="width:40px;">#</th>
+          <th>Route (Origin → Destination)</th>
+          <th style="width:110px;">Pickup Time</th>
+          <th style="width:100px;">Truck #</th>
+          <th>Driver</th>
+          <th style="width:100px;">Broker</th>
+          <th style="width:120px;">Status</th>
+          <th style="width:80px;">Actions</th>
+        </tr></thead>
+        <tbody id="lane-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- LOAD BOARD -->
+<div id="page-loads" class="page">
+  <div class="stats-row s4">
+    <div class="stat-card"><div class="stat-val" id="lb-total">0</div><div class="stat-lbl">Total Loads</div></div>
+    <div class="stat-card"><div class="stat-val" id="lb-unassigned" style="color:#f4a935;">0</div><div class="stat-lbl">Unassigned</div></div>
+    <div class="stat-card"><div class="stat-val" id="lb-assigned" style="color:#4ade80;">0</div><div class="stat-lbl">Assigned</div></div>
+    <div class="stat-card"><div class="stat-val" id="lb-sent" style="color:#60a5fa;">0</div><div class="stat-lbl">Sent</div></div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">📋 Load Board
+      <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="fpill active" onclick="setLBF('all',this)" style="margin:0;">All</button>
+        <button class="fpill" onclick="setLBF('unassigned',this)" style="margin:0;">Unassigned</button>
+        <button class="fpill" onclick="setLBF('assigned',this)" style="margin:0;">Assigned</button>
+        <button class="fpill" onclick="setLBF('sent',this)" style="margin:0;">Sent</button>
+        <button class="btn-red" onclick="clearLoads()" style="font-size:11px;padding:5px 10px;">🗑 Clear</button>
+      </div>
+    </div>
+    <div id="load-board"></div>
+  </div>
+</div>
+
+<!-- AI PICKS -->
+<div id="page-ai" class="page">
+  <div class="panel">
+    <div class="ptitle">🤖 AI Load Recommendations
+      <span style="font-size:11px;color:#6b7490;font-weight:400;text-transform:none;">Based on driver positions, weekly gross gaps, and market rates</span>
+      <button class="btn" onclick="generateAIPicks()" id="ai-gen-btn" style="margin-left:auto;font-size:12px;padding:8px 16px;">↻ Refresh Picks</button>
+    </div>
+    <div id="ai-picks-container"></div>
   </div>
 
+  <div class="panel">
+    <div class="ptitle">📦 Available Broker Loads
+      <span style="font-size:11px;color:#6b7490;font-weight:400;text-transform:none;">Arrive · NTG · Echo — refreshed every 10 min</span>
+      <button class="btn-sec" onclick="refreshBrokerLoads()" style="margin-left:auto;font-size:11px;padding:5px 12px;">↻ Refresh</button>
+    </div>
+    <div id="broker-loads"></div>
+  </div>
+</div>
+
+<!-- GROSS SHEET -->
+<div id="page-gross" class="page">
+  <div class="stats-row s4">
+    <div class="stat-card"><div class="stat-val" id="gs-total-gross">$0</div><div class="stat-lbl">Fleet Gross This Week</div></div>
+    <div class="stat-card"><div class="stat-val" id="gs-fleet-ou" style="color:#9ca3af;">$0</div><div class="stat-lbl">Fleet Over/Under</div></div>
+    <div class="stat-card"><div class="stat-val" id="gs-total-miles">0</div><div class="stat-lbl">Total Miles</div></div>
+    <div class="stat-card"><div class="stat-val" id="gs-avg-rpm">$0.00</div><div class="stat-lbl">Avg RPM</div></div>
+  </div>
   <div class="panel">
     <div class="ptitle">📊 Weekly Gross Sheet
       <input type="week" class="inp" id="gs-week" value="2026-W14" onchange="renderGrossSheet()" style="margin-left:auto;font-size:12px;padding:5px 10px;">
     </div>
-    <div class="target-bar">
-      <div class="target-info">Weekly Target: <span class="target-val">$12,000</span> per truck</div>
-      <div class="target-info">Min Rate: <span class="target-val">$2.50/mi</span></div>
-      <div class="target-info">Days off reduce target by <span class="target-val">$1,714/day</span> (HOME/RESET/OFF/OOS)</div>
-      <div style="margin-left:auto;display:flex;gap:6px;">
-        <button class="btn-sec" onclick="saveGrossData()">💾 Save Week</button>
-        <button class="btn-sec" onclick="clearGrossWeek()">🗑 Clear Week</button>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+      <div style="background:#111827;border:1.5px solid #2d3748;border-radius:7px;padding:7px 12px;font-size:12px;color:#9ca3af;">
+        Target: <strong style="color:#f4a935;">$12,000/wk</strong> · Min Rate: <strong style="color:#f4a935;">$2.50/mi</strong> · Days off reduce target by <strong style="color:#f4a935;">$1,714/day</strong>
+      </div>
+      <div style="display:flex;gap:6px;margin-left:auto;">
+        <button class="btn-sm" onclick="setPGS('HOME')">HOME</button>
+        <button class="btn-sm" onclick="setPGS('RESET')">RESET</button>
+        <button class="btn-sm" onclick="setPGS('OFF')">OFF</button>
+        <button class="btn-sm" onclick="setPGS('OOS')">OOS</button>
+        <button class="btn-sec" onclick="saveGross()" style="font-size:11px;padding:5px 12px;">💾 Save</button>
+        <button class="btn-red" onclick="clearGross()" style="font-size:11px;padding:5px 10px;">🗑 Clear</button>
       </div>
     </div>
-    <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;font-size:11px;color:#6b7490;align-items:center;">
-      <span style="font-weight:600;color:#9ca3af;">Quick status:</span>
-      <button class="btn-sm" onclick="setPendingStatus('HOME')">HOME</button>
-      <button class="btn-sm" onclick="setPendingStatus('RESET')">RESET</button>
-      <button class="btn-sm" onclick="setPendingStatus('OFF')">OFF</button>
-      <button class="btn-sm" onclick="setPendingStatus('OOS')">OOS</button>
-      <span style="color:#4a5570;">← click button then click a day cell to stamp status</span>
-    </div>
     <div class="gs-wrap">
-      <table class="gs-tbl" id="gs-table">
-        <thead>
-          <tr>
-            <th style="width:28px;">#</th>
-            <th style="width:180px;text-align:left;">Driver</th>
-            <th style="width:55px;">Truck</th>
-            <th style="width:70px;" id="gs-th-0">MON</th>
-            <th style="width:70px;" id="gs-th-1">TUE</th>
-            <th style="width:70px;" id="gs-th-2">WED</th>
-            <th style="width:70px;" id="gs-th-3">THU</th>
-            <th style="width:70px;" id="gs-th-4">FRI</th>
-            <th style="width:70px;" id="gs-th-5">SAT</th>
-            <th style="width:70px;" id="gs-th-6">SUN</th>
-            <th style="width:80px;">GROSS</th>
-            <th style="width:90px;">OVER/UNDER</th>
-            <th style="width:60px;">RPM</th>
-            <th style="width:65px;">MILES</th>
-            <th style="width:120px;">Notes</th>
-          </tr>
-        </thead>
+      <table class="gs-tbl">
+        <thead><tr>
+          <th style="width:25px;">#</th>
+          <th style="width:175px;text-align:left;">Driver</th>
+          <th style="width:50px;">Truck</th>
+          <th style="width:68px;" id="gth-0">MON</th>
+          <th style="width:68px;" id="gth-1">TUE</th>
+          <th style="width:68px;" id="gth-2">WED</th>
+          <th style="width:68px;" id="gth-3">THU</th>
+          <th style="width:68px;" id="gth-4">FRI</th>
+          <th style="width:68px;" id="gth-5">SAT</th>
+          <th style="width:68px;" id="gth-6">SUN</th>
+          <th style="width:78px;">GROSS</th>
+          <th style="width:88px;">OVER/UNDER</th>
+          <th style="width:55px;">RPM</th>
+          <th style="width:62px;">MILES</th>
+          <th style="width:110px;">Notes</th>
+        </tr></thead>
         <tbody id="gs-tbody"></tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- ===== LOAD BOARD ===== -->
-<div id="page-loads" class="page">
-  <div class="stats-row stats-4" style="margin-bottom:14px;">
-    <div class="stat-card"><div class="stat-val" id="lb-total">0</div><div class="stat-lbl">Total Loads</div></div>
-    <div class="stat-card"><div class="stat-val" id="lb-unassigned" style="color:#f4a935;">0</div><div class="stat-lbl">Unassigned</div></div>
-    <div class="stat-card"><div class="stat-val" id="lb-assigned" style="color:#4ade80;">0</div><div class="stat-lbl">Assigned</div></div>
-    <div class="stat-card"><div class="stat-val" id="lb-sent" style="color:#60a5fa;">0</div><div class="stat-lbl">Message Sent</div></div>
-  </div>
-
-  <div class="panel">
-    <div class="ptitle">📋 Load Board
-      <div style="margin-left:auto;display:flex;gap:8px;">
-        <button class="filter-pill active" onclick="setLBFilter('all',this)" style="margin:0;">All</button>
-        <button class="filter-pill" onclick="setLBFilter('unassigned',this)" style="margin:0;">Unassigned</button>
-        <button class="filter-pill" onclick="setLBFilter('assigned',this)" style="margin:0;">Assigned</button>
-        <button class="btn-sec" onclick="clearLoads()">🗑 Clear</button>
-      </div>
-    </div>
-    <div id="load-board" class="load-cards"></div>
-  </div>
-</div>
-
-<!-- ===== EMAIL SCANNER ===== -->
+<!-- EMAIL SCANNER -->
 <div id="page-email" class="page">
-  <div class="g2" style="margin-bottom:16px;">
-
+  <div class="g2" style="margin-bottom:14px;">
     <div class="panel" style="margin:0;">
       <div class="ptitle">🔌 Gmail Connection</div>
       <div id="email-conn-ok" style="display:none;" class="conn-ok">
-        <div style="font-size:28px;margin-bottom:8px;">✅</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;color:#4ade80;font-weight:700;">Gmail Connected</div>
-        <div style="font-size:12px;color:#9ca3af;margin-top:4px;">Auto-scanning for rate confirmations</div>
+        <div style="font-size:28px;margin-bottom:6px;">✅</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;color:#4ade80;font-weight:700;">Gmail Connected</div>
+        <div style="font-size:11px;color:#9ca3af;margin-top:3px;">Auto-scanning for rate confirmations</div>
       </div>
       <div id="email-conn-form">
         <div class="token-box">
-          <div class="lbl" style="color:#f4a935;margin-bottom:8px;">Paste Access Token</div>
-          <div style="font-size:12px;color:#9ca3af;margin-bottom:8px;">Token starts with <code style="background:#0d1117;padding:1px 6px;border-radius:4px;color:#f4a935;">ya29.</code></div>
-          <textarea class="inp" id="token-input" style="min-height:80px;font-size:11px;font-family:monospace;width:100%;margin-bottom:10px;" placeholder="ya29.a0Aa7MYiq4..."></textarea>
+          <div class="lbl" style="color:#f4a935;margin-bottom:6px;">Access Token</div>
+          <textarea class="inp" id="token-inp" style="min-height:75px;font-size:11px;font-family:monospace;width:100%;margin-bottom:8px;" placeholder="ya29.a0Aa7...paste token here"></textarea>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn" onclick="connectGmail()">Connect Gmail</button>
-            <button class="btn-sec" onclick="getNewToken()">Get New Token ↗</button>
+            <button class="btn" onclick="connectGmail()">Connect</button>
+            <button class="btn-sec" onclick="getNewToken()">Get Token ↗</button>
           </div>
-          <div id="conn-msg" style="margin-top:8px;font-size:12px;min-height:16px;"></div>
+          <div id="conn-msg" style="margin-top:7px;font-size:11px;min-height:16px;"></div>
         </div>
       </div>
     </div>
-
     <div class="panel" style="margin:0;">
-      <div class="ptitle">⚙️ Scan Settings</div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div><div class="lbl">Keywords</div><input class="inp" id="scan-kw" value="rate confirmation OR rate con OR load confirmation" style="width:100%;"></div>
+      <div class="ptitle">⚙ Scan Settings</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div><div class="lbl">Keywords</div><input class="inp" id="scan-kw" value="rate confirmation OR rate con OR load confirmation" style="width:100%;font-size:12px;"></div>
         <div class="g2">
-          <div><div class="lbl">Max Emails</div>
-            <select class="inp" id="scan-max" style="width:100%;">
-              <option value="10">Last 10</option>
-              <option value="25" selected>Last 25</option>
-              <option value="50">Last 50</option>
-            </select>
-          </div>
-          <div><div class="lbl">Auto-Scan</div>
-            <select class="inp" id="scan-auto" style="width:100%;">
-              <option value="0">Manual only</option>
-              <option value="5">Every 5 min</option>
-              <option value="10" selected>Every 10 min</option>
-              <option value="30">Every 30 min</option>
-            </select>
-          </div>
+          <div><div class="lbl">Max Emails</div><select class="inp" id="scan-max" style="width:100%;font-size:12px;"><option value="10">Last 10</option><option value="25" selected>Last 25</option><option value="50">Last 50</option></select></div>
+          <div><div class="lbl">Auto-Scan</div><select class="inp" id="scan-auto" style="width:100%;font-size:12px;"><option value="0">Manual</option><option value="5">5 min</option><option value="10" selected>10 min</option><option value="30">30 min</option></select></div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn" onclick="scanInbox()" id="scan-btn">🔍 Scan Now</button>
-          <button class="btn-sec" onclick="toggleAuto()" id="auto-btn">▶ Auto-Scan</button>
-          <button class="btn-sec" onclick="processAllEmails()">⚡ Process All</button>
+          <button class="btn" onclick="scanInbox()" id="scan-btn" style="font-size:12px;padding:8px 16px;">🔍 Scan Now</button>
+          <button class="btn-sec" onclick="toggleAutoScan()" id="auto-btn" style="font-size:12px;padding:8px 14px;">▶ Auto-Scan</button>
+          <button class="btn-sec" onclick="processAllEmails()" style="font-size:12px;padding:8px 14px;">⚡ Process All</button>
         </div>
       </div>
     </div>
   </div>
-
   <div class="panel">
     <div class="ptitle">📟 Activity Log</div>
-    <div class="log-box" id="email-log"><span style="color:#9ca3af;">[SYSTEM] Connect Gmail and click Scan to begin finding rate confirmations.</span></div>
+    <div class="log-box" id="email-log"><span style="color:#9ca3af;">[SYSTEM] Connect Gmail and scan to begin.</span></div>
   </div>
-
   <div class="panel">
     <div class="ptitle">📬 Emails Found
       <div style="margin-left:auto;display:flex;gap:6px;">
-        <button class="filter-pill active" onclick="setEFilter('all',this)" style="margin:0;">All</button>
-        <button class="filter-pill" onclick="setEFilter('new',this)" style="margin:0;">New</button>
-        <button class="filter-pill" onclick="setEFilter('done',this)" style="margin:0;">Processed</button>
+        <button class="fpill active" onclick="setEF('all',this)" style="margin:0;">All</button>
+        <button class="fpill" onclick="setEF('new',this)" style="margin:0;">New</button>
+        <button class="fpill" onclick="setEF('done',this)" style="margin:0;">Processed</button>
         <button class="btn-sec" onclick="clearEmails()" style="font-size:11px;padding:4px 10px;">Clear</button>
       </div>
     </div>
-    <div class="email-list" id="email-list"><div style="text-align:center;padding:30px;color:#4a5570;font-size:13px;">No emails yet — connect Gmail and scan inbox</div></div>
+    <div class="email-list" id="email-list"><div style="text-align:center;padding:24px;color:#4a5570;font-size:13px;">No emails — connect Gmail and scan</div></div>
   </div>
 </div>
 
-<!-- ===== RATE INTELLIGENCE ===== -->
+<!-- RATE INTELLIGENCE -->
 <div id="page-rate" class="page">
   <div class="panel">
-    <div class="ptitle">💰 Rate Intelligence Tool
-      <span style="font-size:11px;color:#6b7490;font-weight:400;text-transform:none;">On the phone with a broker? Get your offer range in seconds.</span>
-    </div>
+    <div class="ptitle">💰 Rate Intelligence — On the Phone with a Broker?</div>
     <div class="rate-form">
       <div><div class="lbl">Origin City</div><input class="inp" id="ri-origin" placeholder="e.g. Chicago, IL" style="width:100%;"></div>
       <div><div class="lbl">Destination City</div><input class="inp" id="ri-dest" placeholder="e.g. Atlanta, GA" style="width:100%;"></div>
-      <div><div class="lbl">Estimated Miles</div><input class="inp" id="ri-miles" placeholder="e.g. 720" type="number" style="width:100%;"></div>
-      <div><div class="lbl">Equipment Type</div>
-        <select class="inp" id="ri-equip" style="width:100%;">
-          <option value="53 Dry Van">53' Dry Van</option>
-          <option value="Reefer">Reefer</option>
-          <option value="Flatbed">Flatbed</option>
-          <option value="Vented Van">Vented Van</option>
-          <option value="Step Deck">Step Deck</option>
-        </select>
-      </div>
-      <div><div class="lbl">Load Requirements</div>
-        <div style="display:flex;flex-direction:column;gap:6px;margin-top:2px;">
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#d1d5db;cursor:pointer;"><input type="checkbox" id="req-team" style="accent-color:#f4a935;"> Team drivers required</label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#d1d5db;cursor:pointer;"><input type="checkbox" id="req-straps"> 12 straps / securement</label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#d1d5db;cursor:pointer;"><input type="checkbox" id="req-hazmat"> Hazmat</label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#d1d5db;cursor:pointer;"><input type="checkbox" id="req-tarp"> Tarps required</label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#d1d5db;cursor:pointer;"><input type="checkbox" id="req-liftgate"> Liftgate</label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#d1d5db;cursor:pointer;"><input type="checkbox" id="req-sameday"> Same day / short notice</label>
+      <div><div class="lbl">Estimated Miles</div><input class="inp" id="ri-miles" placeholder="720" type="number" style="width:100%;"></div>
+      <div><div class="lbl">Equipment</div><select class="inp" id="ri-equip" style="width:100%;"><option>53 Dry Van</option><option>Reefer</option><option>Flatbed</option><option>Vented Van</option><option>Step Deck</option></select></div>
+      <div>
+        <div class="lbl">Load Requirements</div>
+        <div style="display:flex;flex-direction:column;gap:5px;margin-top:2px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#d1d5db;cursor:pointer;"><input type="checkbox" id="req-straps" style="accent-color:#f4a935;"> 12 straps / securement (+$150)</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#d1d5db;cursor:pointer;"><input type="checkbox" id="req-hazmat"> Hazmat (+$300)</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#d1d5db;cursor:pointer;"><input type="checkbox" id="req-tarp"> Tarps (+$175)</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#d1d5db;cursor:pointer;"><input type="checkbox" id="req-liftgate"> Liftgate (+$125)</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#d1d5db;cursor:pointer;"><input type="checkbox" id="req-sameday"> Same day (+$250)</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#d1d5db;cursor:pointer;"><input type="checkbox" id="req-vented"> Vented van (+$200)</label>
         </div>
       </div>
-      <div><div class="lbl">Market Conditions</div>
-        <select class="inp" id="ri-market" style="width:100%;margin-bottom:10px;">
-          <option value="normal">Normal market</option>
-          <option value="tight">Tight market (high demand)</option>
-          <option value="soft">Soft market (trucks available)</option>
-          <option value="holiday">Holiday / peak season</option>
-        </select>
+      <div>
+        <div class="lbl">Market</div>
+        <select class="inp" id="ri-market" style="width:100%;margin-bottom:8px;"><option value="normal">Normal</option><option value="tight">Tight (high demand)</option><option value="soft">Soft (many trucks)</option><option value="holiday">Holiday/Peak</option></select>
         <div class="lbl" style="margin-top:8px;">Broker</div>
-        <select class="inp" id="ri-broker" style="width:100%;">
-          <option value="">Unknown / Other</option>
-          <option value="Arrive Logistics">Arrive Logistics</option>
-          <option value="NTG">NTG (Nolan Transportation)</option>
-          <option value="Echo Logistics">Echo Logistics</option>
-          <option value="CH Robinson">C.H. Robinson</option>
-          <option value="Coyote">Coyote Logistics</option>
-        </select>
+        <select class="inp" id="ri-broker" style="width:100%;"><option value="">Other</option><option>Arrive Logistics</option><option>NTG</option><option>Echo Logistics</option><option>CH Robinson</option><option>Coyote</option></select>
       </div>
     </div>
-    <div style="margin-top:14px;display:flex;gap:10px;">
-      <button class="btn" onclick="calcRate()" id="rate-btn">Calculate Rate</button>
-      <button class="btn-sec" onclick="clearRateForm()">Clear</button>
+    <div style="margin-top:12px;display:flex;gap:8px;">
+      <button class="btn" onclick="calcRate()">Calculate Rate</button>
+      <button class="btn-sec" onclick="clearRate()">Clear</button>
     </div>
+    <div class="rate-result" id="rate-result" style="margin-top:14px;">
+      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;">
+        <div><div class="lbl">Offer Price</div><div class="rate-big" id="ri-offer">$0</div><div style="font-size:11px;color:#9ca3af;" id="ri-offer-rpm">$0.00/mi</div></div>
+        <div><div class="lbl">Walk-Away Min</div><div class="rate-min" id="ri-min">$0</div><div style="font-size:11px;color:#9ca3af;" id="ri-min-rpm">$0.00/mi</div></div>
+        <div style="flex:1;"><div class="lbl">Script</div><div id="ri-script" style="font-size:12px;color:#e5e7eb;line-height:1.6;background:#111827;border-radius:8px;padding:10px;"></div></div>
+      </div>
+      <div class="lbl">Breakdown</div>
+      <div id="ri-breakdown"></div>
+    </div>
+  </div>
+</div>
 
-    <div class="rate-result" id="rate-result" style="margin-top:16px;">
-      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px;">
-        <div>
-          <div class="lbl">Offer Price</div>
-          <div class="rate-big" id="ri-offer">$0</div>
-          <div style="font-size:12px;color:#9ca3af;" id="ri-offer-rpm">$0.00/mi</div>
-        </div>
-        <div>
-          <div class="lbl">Walk-Away Minimum</div>
-          <div class="rate-min" id="ri-min">$0</div>
-          <div style="font-size:12px;color:#9ca3af;" id="ri-min-rpm">$0.00/mi</div>
-        </div>
-        <div style="flex:1;">
-          <div class="lbl">Negotiation Script</div>
-          <div id="ri-script" style="font-size:13px;color:#e5e7eb;line-height:1.6;background:#111827;border-radius:8px;padding:12px;"></div>
-        </div>
+<!-- ACTIVITY LOG -->
+<div id="page-activity" class="page">
+  <div class="panel">
+    <div class="ptitle">📝 Activity Log — All System Changes
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        <select class="inp" id="act-filter-role" onchange="renderActivityLog()" style="font-size:12px;padding:5px 10px;">
+          <option value="">All Roles</option>
+          <option value="Manager">Manager</option>
+          <option value="Dispatcher">Dispatcher</option>
+          <option value="Fleet">Fleet</option>
+          <option value="Update">Update</option>
+          <option value="Accounting">Accounting</option>
+        </select>
+        <button class="btn-sec" onclick="activityLog=[];renderActivityLog()" style="font-size:11px;padding:5px 10px;">Clear Log</button>
       </div>
-      <div class="lbl">Rate Breakdown</div>
-      <div class="rate-adj" id="ri-breakdown"></div>
+    </div>
+    <div id="activity-log-container" style="background:#111827;border:1px solid #2d3748;border-radius:8px;max-height:600px;overflow-y:auto;">
+      <div style="text-align:center;padding:30px;color:#4a5570;font-size:13px;">No activity recorded yet. Changes made in the system will appear here.</div>
     </div>
   </div>
 </div>
 
 </div><!-- end content -->
+</div><!-- end main-app -->
 
 <!-- MESSAGE MODAL -->
 <div class="modal-bg" id="msg-modal" onclick="if(event.target===this)closeModal()">
@@ -516,11 +569,11 @@ select.inp option{background:#111827;}
     <div class="modal-body">
       <div><div class="lbl">Driver</div><div style="font-size:14px;font-weight:600;color:#f3f4f6;" id="modal-driver">—</div></div>
       <div><div class="lbl">Message</div><div class="msg-out loading" id="modal-msg"><span class="spinner"></span>Generating...</div></div>
-      <div><div class="lbl">Extra notes</div><textarea class="inp" id="modal-notes" style="min-height:55px;font-size:12px;width:100%;" placeholder="Extra instructions..."></textarea></div>
+      <div><div class="lbl">Extra Notes</div><textarea class="inp" id="modal-notes" style="min-height:55px;font-size:12px;width:100%;" placeholder="Extra instructions..."></textarea></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn" onclick="copyMsg()">📋 Copy Message</button>
-        <button class="btn-sec" onclick="regenMsg()">↻ Regenerate</button>
-        <button class="btn-sec" onclick="markSent()">✅ Mark Sent</button>
+        <button class="btn" onclick="copyMsg()">📋 Copy</button>
+        <button class="btn-sec" onclick="regenMsg()">↻ Regen</button>
+        <button class="btn-sec" onclick="markSent()">✅ Sent</button>
       </div>
     </div>
   </div>
@@ -528,45 +581,34 @@ select.inp option{background:#111827;}
 
 <script>
 const MODEL = 'claude-sonnet-4-20250514';
-const STATUSES = ['Ready','Covered','PU','PU checked in','ETA','Unloading','Home','HOLD','Sleeping','Dhding','OOS','TRL MOVE','Cancelled','FIRED','DOT','Getting ready','Waiting at the receiver','At PU Issue'];
-const STATUS_CLASS = {Ready:'s-ready',Covered:'s-covered','PU':'s-pu','PU checked in':'s-puchecked',ETA:'s-eta',Unloading:'s-unloading',Home:'s-home',HOLD:'s-hold',Sleeping:'s-sleeping',Dhding:'s-dhding',OOS:'s-oos','TRL MOVE':'s-trlmove',Cancelled:'s-dhding',FIRED:'s-fired',DOT:'s-dot','Getting ready':'s-getready','Waiting at the receiver':'s-waiting','At PU Issue':'s-puproblem'};
 
-// ===== DEMO FLEET DATA =====
-const DISPATCHERS = ['Bob / Harry','Hugo / Freddy','Myles / Theodore','Austin / Kennedy'];
-const CITIES = ['Orlando, FL','Dallas, TX','Chicago, IL','Atlanta, GA','Miami, FL','Los Angeles, CA','Memphis, TN','Houston, TX','Nashville, TN','Denver, CO','Phoenix, AZ','Charlotte, NC','Indianapolis, IN','Columbus, OH','Kansas City, MO'];
-const DEST_CITIES = ['Chicago, IL','Atlanta, GA','Memphis, TN','Dallas, TX','Denver, CO','Los Angeles, CA','Phoenix, AZ','Charlotte, NC','Nashville, TN','Houston, TX','Miami, FL','New York, NY','Detroit, MI','Cleveland, OH','Seattle, WA'];
+// ===== USERS =====
+const USERS = {
+  'manager': {pass:'Manager2026!',role:'Manager',name:'Manager'},
+  'dispatcher': {pass:'Dispatch2026!',role:'Dispatcher',name:'Dispatcher'},
+  'fleet': {pass:'Fleet2026!',role:'Fleet',name:'Fleet Team'},
+  'update': {pass:'Update2026!',role:'Update',name:'Update Team'},
+  'accounting': {pass:'Acct2026!',role:'Accounting',name:'Accounting'},
+};
 
-const FLEET = [
-  {pm:'',load:'36245273',truck:'403634',trailer:'HYUZ166057',driver:'(ILY) Roobenco Gerbier #403634',company:'ily',phone:'954-818-1797',disp:'Bob / Harry',status:'ETA',loc:'Chino, CA',dest:'Orlando, FL - Fort Lauderdale, FL',overdue:false,bookedTrl:false},
-  {pm:'',load:'66848020',truck:'838895',trailer:'901192',driver:'(BOX) Clifton White #838895',company:'box',phone:'954-770-9600',disp:'Bob / Harry',status:'ETA',loc:'Indian Lake, NY',dest:'Denver, CO',overdue:false,bookedTrl:false},
-  {pm:'',load:'36170325',truck:'544607',trailer:'W20712',driver:'(ILY) Abdeslam Saibi #544607',company:'ily',phone:'913-429-1180',disp:'Bob / Harry',status:'ETA',loc:'Valley Center, KS',dest:'Fresno, CA → North Highlands, CA',overdue:false,bookedTrl:false},
-  {pm:'Soon',load:'66856103',truck:'20352',trailer:'904950',driver:'(ILY) Harun Njamba #20352',company:'ily',phone:'919-270-3549',disp:'Bob / Harry',status:'ETA',loc:'Texarkana, AR',dest:'Groveport, OH',overdue:false,bookedTrl:false},
-  {pm:'',load:'10095668',truck:'145',trailer:'906581',driver:'(ILY) Walkins Severe #145',company:'ily',phone:'754 281 1083',disp:'Hugo / Freddy',status:'PU',loc:'LEE, FL',dest:'COTTONWOOD, AL',overdue:true,bookedTrl:false},
-  {pm:'',load:'5721-2613',truck:'155',trailer:'044471',driver:'(ILY) Mackenson Abraham #155',company:'ily',phone:'954-477-5712',disp:'Hugo / Freddy',status:'PU checked in',loc:'Groveport, OH',dest:'Tolleson, AZ - Los Angeles, CA',overdue:false,bookedTrl:true},
-  {pm:'Overdue',load:'',truck:'191',trailer:'PO',driver:'(ILY DN) Lomas Donald #191',company:'ily',phone:'727-501-3746',disp:'Hugo / Freddy',status:'Sleeping',loc:'Murray, KY',dest:'',overdue:false,bookedTrl:false},
-  {pm:'',load:'',truck:'841990',trailer:'911399',driver:'(ILY) Dieulepere Minor #841990',company:'ily',phone:'470-302-2811',disp:'Hugo / Freddy',status:'Home',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
-  {pm:'',load:'',truck:'20347',trailer:'TS044682',driver:'(ILY) Garcia Carlos #20347',company:'ily',phone:'(813) 445-0094',disp:'Hugo / Freddy',status:'Home',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
-  {pm:'',load:'',truck:'838897',trailer:'PO',driver:'(ILY) Stanley Larosiliere #174',company:'ily',phone:'954-123-4567',disp:'Myles / Theodore',status:'Home',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
-  {pm:'',load:'',truck:'841074',trailer:'PO',driver:'(ILY) Juan Carlos Franco #003',company:'ily',phone:'561-234-5678',disp:'Myles / Theodore',status:'Home',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
-  {pm:'Soon',load:'0251548',truck:'139',trailer:'LOT535020',driver:'(ILY) Passos Cerqueira Juarez #139',company:'ily',phone:'(813) 573-0574',disp:'Myles / Theodore',status:'ETA',loc:'Independance, KY',dest:'Denver, CO',overdue:false,bookedTrl:true},
-  {pm:'',load:'1101-2613',truck:'838891',trailer:'044574',driver:'(ILY) Glenn Hunter #838891',company:'ily',phone:'213-868-6022',disp:'Myles / Theodore',status:'ETA',loc:'Groveport, OH',dest:'Orlando, FL - Fort Lauderdale, FL',overdue:false,bookedTrl:false},
-  {pm:'',load:'0252139',truck:'838892',trailer:'PO',driver:'(BOX) Charles Wilguer #838892',company:'box',phone:'941 324 1106',disp:'Myles / Theodore',status:'Unloading',loc:'Pooler, GA',dest:'Keasbey, NJ',overdue:false,bookedTrl:false},
-  {pm:'',load:'4329929',truck:'10080',trailer:'905265',driver:'(ILY) Stanley Jules #10080',company:'ily',phone:'(303) 848-0317',disp:'Austin / Kennedy',status:'ETA pending',loc:'Concord, NC',dest:'Groveport, OH',overdue:false,bookedTrl:false},
-  {pm:'',load:'',truck:'102',trailer:'910510',driver:'(ILY) Claudel Gressy #102',company:'ily',phone:'754-326-5014',disp:'Austin / Kennedy',status:'Ready',loc:'Danville, VA',dest:'',overdue:false,bookedTrl:false},
-  {pm:'',load:'',truck:'487040',trailer:'902464',driver:'(ILY) Veillard Olivier #487040',company:'ily',phone:'954-393-7114',disp:'Austin / Kennedy',status:'Ready',loc:'Suffolk, VA',dest:'',overdue:false,bookedTrl:false},
-  {pm:'',load:'',truck:'121',trailer:'PO',driver:'(ILY) Widson Paul #121',company:'ily',phone:'561-860-3230',disp:'Austin / Kennedy',status:'Ready',loc:'East Brunswick, NJ',dest:'',overdue:false,bookedTrl:false},
-  {pm:'',load:'',truck:'841071',trailer:'013185',driver:'(ILY) Chatelain Bagnio #704685',company:'ily',phone:'954-496-0066',disp:'Austin / Kennedy',status:'Ready',loc:'Dallas, TX',dest:'',overdue:false,bookedTrl:false},
-  {pm:'',load:'',truck:'176',trailer:'PO',driver:'(ILY) Malachie Raphael #176',company:'ily',phone:'689-243-8157',disp:'Bob / Harry',status:'Home',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
-  {pm:'',load:'',truck:'10',trailer:'PO',driver:'(ILY) Pierre Silaire #10',company:'ily',phone:'954-412-9721',disp:'Bob / Harry',status:'OOS',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
-  {pm:'',load:'',truck:'159',trailer:'PO',driver:'(ILY) Bladjimy Exantus #159',company:'ily',phone:'954-310-4713',disp:'Hugo / Freddy',status:'Home',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
-  {pm:'',load:'88234021',truck:'838898',trailer:'PO',driver:'(BOX) Frantzdy Paul #838898',company:'box',phone:'954-608-4331',disp:'Hugo / Freddy',status:'Dhding',loc:'Memphis, TN',dest:'Chicago, IL',overdue:false,bookedTrl:false},
-  {pm:'',load:'77543109',truck:'139',trailer:'PO',driver:'(ILY) Joseph Antonio #139',company:'ily',phone:'561-574-8197',disp:'Myles / Theodore',status:'Covered',loc:'Atlanta, GA',dest:'Dallas, TX',overdue:false,bookedTrl:false},
-  {pm:'Soon',load:'',truck:'130',trailer:'PO',driver:'(ILY) Nixon Belotte #130',company:'ily',phone:'845-664-4365',disp:'Myles / Theodore',status:'Home',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
-];
+const ROLE_TABS = {
+  Manager: ['fleet','lanes','loads','ai','gross','email','rate','activity'],
+  Dispatcher: ['fleet','lanes','loads','ai','gross','email','rate'],
+  Fleet: ['fleet','lanes','gross'],
+  Update: ['fleet','lanes','loads','gross'],
+  Accounting: ['gross'],
+};
 
-let fleetFilter = 'all';
-let lbFilter = 'all';
-let eFilter = 'all';
+const ROLE_CAN_EDIT = {
+  Manager: ['fleet','lanes','loads','gross'],
+  Dispatcher: ['lanes','loads','gross'],
+  Fleet: ['fleet'],
+  Update: ['lanes','loads','fleet'],
+  Accounting: [],
+};
+
+let currentUser = null;
+let activityLog = [];
 let loads = [];
 let emails = [];
 let gmailToken = null;
@@ -574,655 +616,571 @@ let autoScanTimer = null;
 let autoOn = false;
 let currentMsgLoadId = null;
 let currentMsgText = '';
-let pendingGrossStatus = null;
+let pendingGS = null;
 let grossData = {};
-let currentWeekKey = '2026-W14';
+let currentWeek = '2026-W14';
+let fleetFilter = 'all';
+let lbFilter = 'all';
+let eFilter = 'all';
+let fleetEditMode = false;
+let laneView = 'all';
 
-// ===== GROSS SHEET DRIVERS =====
-const GS_DISPATCHERS = [
-  { name: 'BOB / HARRY', drivers: [
-    {num:1,name:'(ILY) Roobenco Gerbier',truck:'403634',cpm:70},
-    {num:2,name:'(ILY) Harun Njamba',truck:'20352',cpm:70},
-    {num:3,name:'(BOX) Clifton White',truck:'838895',cpm:65},
-    {num:4,name:'(ILY) Abdeslam Saibi',truck:'544607',cpm:70},
-    {num:5,name:'(ILY) Malachie Raphael',truck:'176',cpm:65},
-    {num:6,name:'(ILY) Pierre Silaire',truck:'10',cpm:null},
-  ]},
-  { name: 'HUGO / FREDDY', drivers: [
-    {num:1,name:'(ILY) Walkins Severe',truck:'145',cpm:72},
-    {num:2,name:'(ILY) Mackenson Abraham',truck:'155',cpm:63},
-    {num:3,name:'(ILY DN) Lomas Donald',truck:'191',cpm:70},
-    {num:4,name:'(ILY) Dieulepere Minor',truck:'841990',cpm:70},
-    {num:5,name:'(ILY) Garcia Carlos',truck:'20347',cpm:70},
-    {num:6,name:'(BOX) Frantzdy Paul',truck:'838898',cpm:63},
-    {num:7,name:'(ILY) Bladjimy Exantus',truck:'159',cpm:63},
-  ]},
-  { name: 'MYLES / THEODORE', drivers: [
-    {num:1,name:'(ILY) Passos Cerqueira Juarez',truck:'139',cpm:70},
-    {num:2,name:'(ILY) Glenn Hunter',truck:'838891',cpm:70},
-    {num:3,name:'(BOX) Charles Wilguer',truck:'838892',cpm:70},
-    {num:4,name:'(ILY) Stanley Larosiliere',truck:'838897',cpm:65},
-    {num:5,name:'(ILY) Juan Carlos Franco',truck:'841074',cpm:null},
-    {num:6,name:'(ILY) Nixon Belotte',truck:'130',cpm:65},
-    {num:7,name:'(ILY) Joseph Antonio',truck:'139',cpm:63},
-  ]},
-  { name: 'AUSTIN / KENNEDY', drivers: [
-    {num:1,name:'(ILY) Stanley Jules',truck:'10080',cpm:70},
-    {num:2,name:'(ILY) Claudel Gressy',truck:'102',cpm:70},
-    {num:3,name:'(ILY) Veillard Olivier',truck:'487040',cpm:65},
-    {num:4,name:'(ILY) Widson Paul',truck:'121',cpm:70},
-    {num:5,name:'(ILY) Chatelain Bagnio',truck:'841071',cpm:70},
-  ]},
-];
+// ===== LOGIN =====
+function doLogin() {
+  const u = document.getElementById('l-user').value.trim().toLowerCase();
+  const p = document.getElementById('l-pass').value;
+  const err = document.getElementById('l-err');
+  if (!USERS[u] || USERS[u].pass !== p) { err.textContent = 'Invalid username or password.'; return; }
+  err.textContent = '';
+  currentUser = { username: u, ...USERS[u] };
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  document.getElementById('hdr-user').textContent = currentUser.name;
+  const rb = document.getElementById('hdr-role-badge');
+  rb.textContent = currentUser.role;
+  rb.className = 'role-badge role-' + currentUser.role.toLowerCase();
+  setupRoleAccess();
+  logActivity('Signed in', '');
+  initApp();
+}
 
-// DEMO LOADS (extracted from emails)
-const DEMO_LOADS = [
-  {id:'ld1',loadNumber:'66819920',broker:'Arrive Logistics',commodity:'General Freight',equipment:'53 Dry Van',rate:2850,loadedMiles:420,totalMiles:447,status:'unassigned',assignedDriver:null,source:'arrive@arrivelogistics.com',emailNotes:'From: Arrive Logistics\nSubject: Rate Confirmation #66819920\nDate: Apr 5, 2026',stops:[{stopNumber:1,type:'PU',company:'Amazon Fulfillment Center',address:'1000 Logistics Blvd',city:'Chicago',state:'IL',zip:'60601',date:'April 07, 2026',timeWindow:'08:00',reference:'AMZ-441092',instructions:'Dock 14, call 30 min before arrival'},{stopNumber:2,type:'DEL',company:'Walmart Distribution',address:'500 Walmart Way',city:'Memphis',state:'TN',zip:'38101',date:'April 08, 2026',timeWindow:'06:00-14:00',reference:'WMT-88321',instructions:null}],specialInstructions:'Team required. 12 straps needed.'},
-  {id:'ld2',loadNumber:'NTG-8812993',broker:'NTG (Nolan Transportation)',commodity:'Electronics',equipment:'53 Dry Van',rate:3200,loadedMiles:587,totalMiles:620,status:'assigned',assignedDriver:{name:'(ILY) Roobenco Gerbier',truck:'403634'},source:'loads@ntgfreight.com',emailNotes:'From: NTG Freight\nSubject: Load Offer NTG-8812993\nDate: Apr 5, 2026',stops:[{stopNumber:1,type:'PU',company:'Best Buy Distribution',address:'7601 Penn Ave S',city:'Richfield',state:'MN',zip:'55423',date:'April 06, 2026',timeWindow:'10:00',reference:'BBY-2026-441',instructions:null},{stopNumber:2,type:'DEL',company:'Best Buy Store #442',address:'4200 Conroy Rd',city:'Orlando',state:'FL',zip:'32839',date:'April 08, 2026',timeWindow:'08:00-16:00',reference:null,instructions:'Call receiver 1 hr before'}],specialInstructions:null},
-  {id:'ld3',loadNumber:'ECHO-445521',broker:'Echo Logistics',commodity:'Auto Parts',equipment:'Vented Van',rate:1950,loadedMiles:312,totalMiles:340,status:'unassigned',assignedDriver:null,source:'dispatch@echo.com',emailNotes:'From: Echo Logistics\nSubject: Load Confirmation ECHO-445521\nDate: Apr 5, 2026',stops:[{stopNumber:1,type:'PU',company:'AutoZone Distribution',address:'123 Commerce Dr',city:'Memphis',state:'TN',zip:'38118',date:'April 07, 2026',timeWindow:'14:00',reference:'AZ-88421',instructions:'Vented van required'},{stopNumber:2,type:'DEL',company:'AutoZone #8821',address:'5400 Buford Hwy',city:'Atlanta',state:'GA',zip:'30340',date:'April 08, 2026',timeWindow:'07:00-15:00',reference:null,instructions:null}],specialInstructions:'Vented van — do not seal doors'},
-  {id:'ld4',loadNumber:'ARR-992341',broker:'Arrive Logistics',commodity:'Home Goods',equipment:'53 Dry Van',rate:4100,loadedMiles:1240,totalMiles:1280,status:'sent',assignedDriver:{name:'(ILY) Glenn Hunter',truck:'838891'},source:'arrive@arrivelogistics.com',emailNotes:'From: Arrive Logistics\nSubject: Rate Confirmation ARR-992341\nDate: Apr 4, 2026',stops:[{stopNumber:1,type:'PU',company:'IKEA Distribution Center',address:'2901 Bellingham Dr',city:'Dallas',state:'TX',zip:'75201',date:'April 05, 2026',timeWindow:'06:00',reference:'IKEA-TX-441',instructions:'Scale after pickup'},{stopNumber:2,type:'DEL',company:'IKEA Store',address:'1700 E Busch Blvd',city:'Tampa',state:'FL',zip:'33612',date:'April 07, 2026',timeWindow:'08:00-17:00',reference:null,instructions:null}],specialInstructions:'12 straps required for securing'},
-];
+function doLogout() {
+  logActivity('Signed out', '');
+  currentUser = null;
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('login-page').style.display = 'block';
+  document.getElementById('l-user').value = '';
+  document.getElementById('l-pass').value = '';
+}
 
-// ===== PAGE SWITCHING =====
+function setupRoleAccess() {
+  const allowed = ROLE_TABS[currentUser.role] || [];
+  document.querySelectorAll('[id^=tnav-]').forEach(btn => {
+    const tab = btn.id.replace('tnav-','');
+    if (!allowed.includes(tab)) btn.classList.add('hidden');
+    else btn.classList.remove('hidden');
+  });
+  const canEdit = ROLE_CAN_EDIT[currentUser.role] || [];
+  const editBtn = document.getElementById('fleet-edit-btn');
+  if (canEdit.includes('fleet')) editBtn.style.display = 'inline-block';
+  const addLane = document.getElementById('add-lane-btn');
+  if (canEdit.includes('lanes')) addLane.style.display = 'inline-block';
+}
+
+// ===== PAGE NAV =====
 function showPage(p, btn) {
   document.querySelectorAll('.page').forEach(el => el.classList.remove('on'));
   document.getElementById('page-' + p).classList.add('on');
-  document.querySelectorAll('.hnav').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
 }
 
-// ===== FLEET BOARD =====
-function setFleetFilter(f, btn) {
-  fleetFilter = f;
-  document.querySelectorAll('#page-fleet .filter-pill').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+// ===== ACTIVITY LOG =====
+function logActivity(action, detail) {
+  if (!currentUser) return;
+  const entry = { ts: new Date(), user: currentUser.name, username: currentUser.username, role: currentUser.role, action, detail };
+  activityLog.unshift(entry);
+  renderActivityLog();
+}
+
+function renderActivityLog() {
+  const filter = document.getElementById('act-filter-role')?.value || '';
+  const filtered = filter ? activityLog.filter(e => e.role === filter) : activityLog;
+  const c = document.getElementById('activity-log-container');
+  if (!filtered.length) { c.innerHTML = '<div style="text-align:center;padding:30px;color:#4a5570;font-size:13px;">No activity recorded yet.</div>'; return; }
+  const roleColors = {Manager:'role-manager',Dispatcher:'role-dispatch',Fleet:'role-fleet',Update:'role-update',Accounting:'role-accounting'};
+  c.innerHTML = filtered.map(e => `
+    <div class="activity-entry">
+      <span class="act-time">${e.ts.toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span>
+      <span class="act-user">${e.user}</span>
+      <span class="role-badge ${roleColors[e.role]||''} act-role">${e.role}</span>
+      <div><div class="act-action">${e.action}</div>${e.detail?`<div class="act-detail">${e.detail}</div>`:''}</div>
+    </div>
+  `).join('');
+}
+
+// ===== FLEET DATA =====
+const FLEET = [
+  {pm:'',load:'36245273',truck:'403634',trailer:'HYUZ166057',driver:'(ILY) Roobenco Gerbier #403634',company:'ily',phone:'954-818-1797',disp:'Bob / Harry',status:'ETA',loc:'Chino, CA',dest:'Orlando, FL',overdue:false,bookedTrl:false},
+  {pm:'',load:'66848020',truck:'838895',trailer:'901192',driver:'(BOX) Clifton White #838895',company:'box',phone:'954-770-9600',disp:'Bob / Harry',status:'ETA',loc:'Indian Lake, NY',dest:'Denver, CO',overdue:false,bookedTrl:false},
+  {pm:'',load:'36170325',truck:'544607',trailer:'W20712',driver:'(ILY) Abdeslam Saibi #544607',company:'ily',phone:'913-429-1180',disp:'Bob / Harry',status:'ETA',loc:'Valley Center, KS',dest:'Fresno, CA',overdue:false,bookedTrl:false},
+  {pm:'Soon',load:'66856103',truck:'20352',trailer:'904950',driver:'(ILY) Harun Njamba #20352',company:'ily',phone:'919-270-3549',disp:'Bob / Harry',status:'ETA',loc:'Texarkana, AR',dest:'Groveport, OH',overdue:false,bookedTrl:false},
+  {pm:'',load:'10095668',truck:'145',trailer:'906581',driver:'(ILY) Walkins Severe #145',company:'ily',phone:'754-281-1083',disp:'Hugo / Freddy',status:'PU',loc:'LEE, FL',dest:'COTTONWOOD, AL',overdue:true,bookedTrl:false},
+  {pm:'',load:'5721-2613',truck:'155',trailer:'044471',driver:'(ILY) Mackenson Abraham #155',company:'ily',phone:'954-477-5712',disp:'Hugo / Freddy',status:'PU checked in',loc:'Groveport, OH',dest:'Tolleson, AZ',overdue:false,bookedTrl:true},
+  {pm:'Overdue',load:'',truck:'191',trailer:'PO',driver:'(ILY DN) Lomas Donald #191',company:'ily',phone:'727-501-3746',disp:'Hugo / Freddy',status:'Sleeping',loc:'Murray, KY',dest:'',overdue:false,bookedTrl:false},
+  {pm:'',load:'',truck:'841990',trailer:'911399',driver:'(ILY) Dieulepere Minor #841990',company:'ily',phone:'470-302-2811',disp:'Hugo / Freddy',status:'Home',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
+  {pm:'',load:'',truck:'20347',trailer:'TS044682',driver:'(ILY) Garcia Carlos #20347',company:'ily',phone:'(813) 445-0094',disp:'Hugo / Freddy',status:'Home',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
+  {pm:'',load:'',truck:'838897',trailer:'PO',driver:'(ILY) Stanley Larosiliere #174',company:'ily',phone:'954-123-4567',disp:'Myles / Theodore',status:'Home',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
+  {pm:'',load:'',truck:'841074',trailer:'PO',driver:'(ILY) Juan Carlos Franco #003',company:'ily',phone:'561-234-5678',disp:'Myles / Theodore',status:'Ready',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
+  {pm:'Soon',load:'0251548',truck:'139',trailer:'LOT535020',driver:'(ILY) Passos Cerqueira #139',company:'ily',phone:'(813) 573-0574',disp:'Myles / Theodore',status:'ETA',loc:'Independance, KY',dest:'Denver, CO',overdue:false,bookedTrl:true},
+  {pm:'',load:'1101-2613',truck:'838891',trailer:'044574',driver:'(ILY) Glenn Hunter #838891',company:'ily',phone:'213-868-6022',disp:'Myles / Theodore',status:'ETA',loc:'Groveport, OH',dest:'Orlando, FL',overdue:false,bookedTrl:false},
+  {pm:'',load:'0252139',truck:'838892',trailer:'PO',driver:'(BOX) Charles Wilguer #838892',company:'box',phone:'941-324-1106',disp:'Myles / Theodore',status:'Unloading',loc:'Pooler, GA',dest:'Keasbey, NJ',overdue:false,bookedTrl:false},
+  {pm:'',load:'4329929',truck:'10080',trailer:'905265',driver:'(ILY) Stanley Jules #10080',company:'ily',phone:'(303) 848-0317',disp:'Austin / Kennedy',status:'ETA pending',loc:'Concord, NC',dest:'Groveport, OH',overdue:false,bookedTrl:false},
+  {pm:'',load:'',truck:'102',trailer:'910510',driver:'(ILY) Claudel Gressy #102',company:'ily',phone:'754-326-5014',disp:'Austin / Kennedy',status:'Ready',loc:'Danville, VA',dest:'',overdue:false,bookedTrl:false},
+  {pm:'',load:'',truck:'487040',trailer:'902464',driver:'(ILY) Veillard Olivier #487040',company:'ily',phone:'954-393-7114',disp:'Austin / Kennedy',status:'Ready',loc:'Suffolk, VA',dest:'',overdue:false,bookedTrl:false},
+  {pm:'',load:'',truck:'121',trailer:'PO',driver:'(ILY) Widson Paul #121',company:'ily',phone:'561-860-3230',disp:'Austin / Kennedy',status:'Ready',loc:'East Brunswick, NJ',dest:'',overdue:false,bookedTrl:false},
+  {pm:'',load:'',truck:'841071',trailer:'013185',driver:'(ILY) Chatelain Bagnio #704685',company:'ily',phone:'954-496-0066',disp:'Austin / Kennedy',status:'Home',loc:'Dallas, TX',dest:'',overdue:false,bookedTrl:false},
+  {pm:'',load:'',truck:'176',trailer:'PO',driver:'(ILY) Malachie Raphael #176',company:'ily',phone:'689-243-8157',disp:'Bob / Harry',status:'Home',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
+  {pm:'',load:'',truck:'10',trailer:'PO',driver:'(ILY) Pierre Silaire #10',company:'ily',phone:'954-412-9721',disp:'Bob / Harry',status:'OOS',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
+  {pm:'',load:'',truck:'159',trailer:'PO',driver:'(ILY) Bladjimy Exantus #159',company:'ily',phone:'954-310-4713',disp:'Hugo / Freddy',status:'Home',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
+  {pm:'',load:'88234021',truck:'838898',trailer:'PO',driver:'(BOX) Frantzdy Paul #838898',company:'box',phone:'954-608-4331',disp:'Hugo / Freddy',status:'Dhding',loc:'Memphis, TN',dest:'Chicago, IL',overdue:false,bookedTrl:false},
+  {pm:'',load:'77543109',truck:'1399',trailer:'PO',driver:'(ILY) Joseph Antonio #139',company:'ily',phone:'561-574-8197',disp:'Myles / Theodore',status:'Covered',loc:'Atlanta, GA',dest:'Dallas, TX',overdue:false,bookedTrl:false},
+  {pm:'Soon',load:'',truck:'130',trailer:'PO',driver:'(ILY) Nixon Belotte #130',company:'ily',phone:'845-664-4365',disp:'Myles / Theodore',status:'Home',loc:'Orlando, FL',dest:'',overdue:false,bookedTrl:false},
+];
+
+const STATUS_CLASS = {Ready:'s-ready',Covered:'s-covered','PU':'s-pu','PU checked in':'s-puchecked',ETA:'s-eta','ETA pending':'s-eta',Unloading:'s-unloading',Home:'s-home',HOLD:'s-hold',Sleeping:'s-sleeping',Dhding:'s-dhding',OOS:'s-oos','TRL MOVE':'s-trlmove',Cancelled:'s-dhding',FIRED:'s-fired',DOT:'s-dot','Getting ready':'s-getready','Waiting at the receiver':'s-waiting','At PU Issue':'s-puproblem'};
+const STATUSES = ['Ready','Covered','PU','PU checked in','ETA','ETA pending','Unloading','Home','HOLD','Sleeping','Dhding','OOS','TRL MOVE','Cancelled','FIRED','DOT','Getting ready','Waiting at the receiver','At PU Issue'];
+
+function setFF(f, btn) { fleetFilter = f; document.querySelectorAll('#page-fleet .fpill').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderFleet(); }
+
+function renderFleet() {
+  const search = (document.getElementById('fleet-search')?.value||'').toLowerCase();
+  let filtered = FLEET;
+  if (fleetFilter==='active') filtered=filtered.filter(t=>!['Home','OOS','FIRED'].includes(t.status)&&t.load);
+  else if (fleetFilter==='ready') filtered=filtered.filter(t=>t.status==='Ready');
+  else if (fleetFilter==='home') filtered=filtered.filter(t=>['Home','OOS'].includes(t.status));
+  else if (fleetFilter==='pm') filtered=filtered.filter(t=>t.pm);
+  else if (fleetFilter==='ily') filtered=filtered.filter(t=>t.company==='ily');
+  else if (fleetFilter==='box') filtered=filtered.filter(t=>t.company==='box');
+  if (search) filtered=filtered.filter(t=>t.driver.toLowerCase().includes(search)||t.truck.toLowerCase().includes(search)||(t.load&&t.load.toLowerCase().includes(search))||t.loc.toLowerCase().includes(search));
+  const canEdit = (ROLE_CAN_EDIT[currentUser?.role]||[]).includes('fleet');
+  const tbody = document.getElementById('fleet-tbody');
+  tbody.innerHTML = filtered.map(t => {
+    const isHome=['Home','OOS','FIRED'].includes(t.status);
+    const rc=isHome?'row-home':t.status==='Ready'?'row-ready':'row-active';
+    const dc=t.company==='box'?'drv-box':'drv-ily';
+    const sc=STATUS_CLASS[t.status]||'s-ready';
+    const trlCell=t.bookedTrl?`<span class="trl-booked">${t.trailer}</span>`:`<span style="color:#d1d5db;">${t.trailer}</span>`;
+    const loadCell=t.overdue?`<span class="load-overdue">⚠ ${t.load}</span>`:`<span style="color:#d1d5db;">${t.load||'—'}</span>`;
+    const pmCell=t.pm==='Overdue'?`<span class="pm-overdue">OVERDUE</span>`:t.pm==='Soon'?`<span class="pm-soon">SOON</span>`:'';
+    const statusCell=canEdit&&fleetEditMode
+      ?`<select class="inp" style="font-size:11px;padding:3px 6px;" onchange="updateFleetStatus('${t.truck}',this.value)">${STATUSES.map(s=>`<option${s===t.status?' selected':''}>${s}</option>`).join('')}</select>`
+      :`<span class="sbadge ${sc}">${t.status}</span>`;
+    return `<tr class="${rc}"><td>${pmCell}</td><td>${loadCell}</td><td style="font-weight:600;color:#e5e7eb;">${t.truck}</td><td>${trlCell}</td><td class="${dc}">${t.driver}</td><td style="color:#9ca3af;font-size:11px;">${t.phone}</td><td style="color:#6b7490;font-size:11px;">${t.disp}</td><td>${statusCell}</td><td style="color:#d1d5db;font-size:11px;">${t.loc}</td><td style="color:#9ca3af;font-size:11px;">${t.dest||'—'}</td></tr>`;
+  }).join('');
+}
+
+function updateFleetStatus(truck, newStatus) {
+  const t = FLEET.find(f=>f.truck===truck);
+  if (!t) return;
+  const old = t.status;
+  t.status = newStatus;
+  logActivity('Updated fleet status', `Truck #${truck} — ${old} → ${newStatus}`);
+  showToast('Status updated: Truck #' + truck);
+}
+
+function toggleFleetEdit() {
+  fleetEditMode = !fleetEditMode;
+  const btn = document.getElementById('fleet-edit-btn');
+  btn.textContent = fleetEditMode ? '✓ Done Editing' : '✏ Edit Mode';
+  btn.style.background = fleetEditMode ? '#f4a935' : '';
+  btn.style.color = fleetEditMode ? '#111' : '';
   renderFleet();
 }
 
-function renderFleet() {
-  const search = document.getElementById('fleet-search')?.value?.toLowerCase() || '';
-  let filtered = FLEET;
+// ===== DEDICATED LANES =====
+let LANES = [
+  {date:'4/06-4/07',loads:[
+    {id:'l1',route:'Cypress TX → Tracy CA',time:'10:00 AM',truck:'0249516',driver:'Dedan',broker:'Arrive',status:'Upcoming'},
+    {id:'l2',route:'Missouri City TX → Rosemount MN',time:'11:00 PM',truck:'0249330',driver:'Inalien',broker:'NTG',status:'Upcoming'},
+    {id:'l3',route:'Dallas TX → Champaign IL',time:'12:06 AM',truck:'',driver:'',broker:'Arrive',status:'NO LOAD'},
+    {id:'l4',route:'Cypress TX → Shawnee KS',time:'1:00 AM',truck:'0249521',driver:'Mardell',broker:'Arrive',status:'Upcoming'},
+    {id:'l5',route:'Cypress TX → Ocala FL',time:'1:00 AM',truck:'0249520',driver:'Junel',broker:'Echo',status:'Upcoming'},
+    {id:'l6',route:'Cypress TX → Shawnee KS',time:'3:00 AM',truck:'0249518',driver:'Desir',broker:'Arrive',status:'Upcoming'},
+    {id:'l7',route:'Cypress TX → Ocala FL',time:'3:00 AM',truck:'0249519',driver:'Nesly',broker:'Arrive',status:'Upcoming'},
+    {id:'l8',route:'Cypress TX → Tracy CA',time:'10:00 AM',truck:'0249560',driver:'Desir Jameson',broker:'NTG',status:'Upcoming'},
+  ]},
+  {date:'4/07-4/08',loads:[
+    {id:'l9',route:'Missouri City TX → Rosemount MN',time:'11:00 PM',truck:'0249550',driver:'Derazin',broker:'Arrive',status:'Upcoming'},
+    {id:'l10',route:'Dallas TX → Champaign IL',time:'12:06 AM',truck:'',driver:'',broker:'Arrive',status:'NO LOAD'},
+    {id:'l11',route:'Cypress TX → Shawnee KS',time:'1:00 AM',truck:'0249521',driver:'',broker:'Arrive',status:'Upcoming'},
+    {id:'l12',route:'Cypress TX → Ocala FL',time:'1:00 AM',truck:'0249535',driver:'Glenn',broker:'Echo',status:'Covered'},
+    {id:'l13',route:'Cypress TX → Tracy CA',time:'10:00 AM',truck:'',driver:'',broker:'NTG',status:'Upcoming'},
+  ]},
+  {date:'4/08-4/09',loads:[
+    {id:'l14',route:'Missouri City TX → Rosemount MN',time:'11:00 PM',truck:'',driver:'',broker:'Arrive',status:'Upcoming'},
+    {id:'l15',route:'Dallas TX → Champaign IL',time:'12:06 AM',truck:'',driver:'',broker:'Arrive',status:'NO LOAD'},
+    {id:'l16',route:'Cypress TX → Tracy CA',time:'10:00 AM',truck:'',driver:'',broker:'NTG',status:'Upcoming'},
+  ]},
+];
 
-  if (fleetFilter === 'active') filtered = filtered.filter(t => !['Home','OOS','FIRED'].includes(t.status) && t.load);
-  else if (fleetFilter === 'ready') filtered = filtered.filter(t => t.status === 'Ready');
-  else if (fleetFilter === 'home') filtered = filtered.filter(t => ['Home','OOS'].includes(t.status));
-  else if (fleetFilter === 'pm') filtered = filtered.filter(t => t.pm === 'Soon' || t.pm === 'Overdue');
-  else if (fleetFilter === 'ily') filtered = filtered.filter(t => t.company === 'ily');
-  else if (fleetFilter === 'box') filtered = filtered.filter(t => t.company === 'box');
+function setLaneView(v, btn) { laneView = v; document.querySelectorAll('#page-lanes .fpill').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderLanes(); }
 
-  if (search) filtered = filtered.filter(t =>
-    t.driver.toLowerCase().includes(search) ||
-    t.truck.toLowerCase().includes(search) ||
-    (t.load && t.load.toLowerCase().includes(search)) ||
-    t.loc.toLowerCase().includes(search) ||
-    t.disp.toLowerCase().includes(search)
-  );
+function renderLanes() {
+  const canEdit = (ROLE_CAN_EDIT[currentUser?.role]||[]).includes('lanes');
+  const tbody = document.getElementById('lane-tbody');
+  let html = '';
+  let rowNum = 0;
+  LANES.forEach(grp => {
+    let loadsInGroup = grp.loads;
+    if (laneView==='upcoming') loadsInGroup=loadsInGroup.filter(l=>l.status==='Upcoming');
+    if (laneView==='unassigned') loadsInGroup=loadsInGroup.filter(l=>!l.driver&&l.status!=='NO LOAD');
+    if (laneView!=='all'&&!loadsInGroup.length) return;
+    html+=`<tr class="lane-date-row"><td colspan="8">📅 ${grp.date}</td></tr>`;
+    loadsInGroup.forEach(lane => {
+      rowNum++;
+      const noload=lane.status==='NO LOAD';
+      const covered=lane.status==='Covered';
+      const rc=noload?'lane-noload':covered?'lane-covered':'lane-row';
+      const sc=lane.status==='Upcoming'?'ls-upcoming':lane.status==='Covered'?'ls-covered':lane.status==='NO LOAD'?'ls-noload':'ls-completed';
+      const truckCell=canEdit?`<input class="lane-inp" value="${lane.truck}" placeholder="Truck #" onchange="updateLane('${lane.id}','truck',this.value)">`:`<span style="color:#d1d5db;">${lane.truck||'—'}</span>`;
+      const driverCell=canEdit?`<input class="lane-inp" value="${lane.driver}" placeholder="Driver name" onchange="updateLane('${lane.id}','driver',this.value)">`:`<span style="color:#d1d5db;">${lane.driver||<span style="color:#f87171;">UNASSIGNED</span>}</span>`;
+      const statusCell=canEdit?`<select class="lane-inp" style="font-size:11px;" onchange="updateLane('${lane.id}','status',this.value)"><option${lane.status==='Upcoming'?' selected':''}>Upcoming</option><option${lane.status==='Covered'?' selected':''}>Covered</option><option${lane.status==='NO LOAD'?' selected':''}>NO LOAD</option><option${lane.status==='Completed'?' selected':''}>Completed</option></select>`:`<span class="lane-status ${sc}">${lane.status}</span>`;
+      html+=`<tr class="${rc}"><td style="color:#9ca3af;font-size:11px;">${rowNum}</td><td class="lane-route">${lane.route}</td><td style="color:#e5e7eb;">${lane.time}</td><td>${truckCell}</td><td>${driverCell}</td><td style="color:#9ca3af;font-size:11px;">${lane.broker}</td><td>${statusCell}</td><td><button class="btn-sm" onclick="copyLaneMsg('${lane.id}')" style="font-size:10px;">📱 Msg</button></td></tr>`;
+    });
+  });
+  tbody.innerHTML = html || '<tr><td colspan="8" style="text-align:center;padding:20px;color:#4a5570;">No lanes match filter</td></tr>';
+}
 
-  const tbody = document.getElementById('fleet-tbody');
-  tbody.innerHTML = filtered.map(t => {
-    const isHome = ['Home', 'OOS', 'FIRED'].includes(t.status);
-    const rowClass = isHome ? 'row-home' : (t.status === 'Ready' ? 'row-ready' : 'row-active');
-    const drvClass = t.company === 'box' ? 'drv-box' : 'drv-ily';
-    const sc = STATUS_CLASS[t.status] || 's-ready';
-    const trlCell = t.bookedTrl
-      ? `<span class="trl-booked">${t.trailer}</span>`
-      : `<span class="trl-normal">${t.trailer}</span>`;
-    const loadCell = t.overdue
-      ? `<span class="load-overdue">⚠ ${t.load}</span>`
-      : `<span class="load-normal">${t.load || '—'}</span>`;
-    const pmCell = t.pm === 'Overdue' ? `<span class="pm-overdue">OVERDUE</span>`
-      : t.pm === 'Soon' ? `<span class="pm-soon">SOON</span>` : '';
-    return `<tr class="${rowClass}">
-      <td>${pmCell}</td>
-      <td>${loadCell}</td>
-      <td style="font-weight:600;color:#e5e7eb;">${t.truck}</td>
-      <td>${trlCell}</td>
-      <td class="${drvClass}">${t.driver}</td>
-      <td style="color:#9ca3af;font-size:11px;">${t.phone}</td>
-      <td style="color:#6b7490;font-size:11px;">${t.disp}</td>
-      <td><span class="status-badge ${sc}">${t.status}</span></td>
-      <td style="color:#d1d5db;font-size:11px;">${t.loc}</td>
-      <td style="color:#9ca3af;font-size:11px;">${t.dest || '—'}</td>
-    </tr>`;
-  }).join('');
+function updateLane(id, field, value) {
+  let found = null;
+  LANES.forEach(g => g.loads.forEach(l => { if(l.id===id) found=l; }));
+  if (!found) return;
+  const old = found[field];
+  found[field] = value;
+  logActivity('Updated dedicated lane', `Lane "${found.route}" — ${field}: "${old}" → "${value}"`);
+  renderLanes();
+}
 
-  // Update stats
-  document.getElementById('fs-total').textContent = FLEET.length;
-  document.getElementById('fs-active').textContent = FLEET.filter(t => !['Home','OOS','FIRED'].includes(t.status) && t.load).length;
-  document.getElementById('fs-ready').textContent = FLEET.filter(t => t.status === 'Ready').length;
-  document.getElementById('fs-home').textContent = FLEET.filter(t => ['Home','OOS'].includes(t.status)).length;
-  document.getElementById('fs-pm').textContent = FLEET.filter(t => t.pm).length;
-  document.getElementById('fs-overdue').textContent = FLEET.filter(t => t.overdue).length;
+function addLaneRow() {
+  const todayStr = new Date().toLocaleDateString('en-US',{month:'numeric',day:'2-digit'});
+  if (!LANES[0]) LANES.unshift({date:todayStr,loads:[]});
+  const newId = 'l' + Date.now();
+  LANES[0].loads.push({id:newId,route:'',time:'',truck:'',driver:'',broker:'',status:'Upcoming'});
+  logActivity('Added dedicated lane row', '');
+  renderLanes();
+}
+
+function copyLaneMsg(id) {
+  let found = null;
+  LANES.forEach(g => g.loads.forEach(l => { if(l.id===id) found=l; }));
+  if (!found) return;
+  const msg = `📍 DEDICATED LOAD\nRoute: ${found.route}\nPickup: ${found.time}\nTruck #: ${found.truck||'TBD'}\nDriver: ${found.driver||'TBD'}\nBroker: ${found.broker}\n\n🔺 Do PTI before departure\n🔺 Send trailer photos to group\n🔺 Scale after pickup\nDrive safe! ✅`;
+  navigator.clipboard.writeText(msg).then(()=>showToast('Lane message copied!')).catch(()=>showToast('Could not copy'));
 }
 
 // ===== GROSS SHEET =====
-const OFF_STATUSES = ['HOME', 'RESET', 'OFF', 'OOS'];
+const GS_DISPATCHERS = [
+  {name:'BOB / HARRY',drivers:[{num:1,name:'(ILY) Roobenco Gerbier',truck:'403634',cpm:70},{num:2,name:'(ILY) Harun Njamba',truck:'20352',cpm:70},{num:3,name:'(BOX) Clifton White',truck:'838895',cpm:65},{num:4,name:'(ILY) Abdeslam Saibi',truck:'544607',cpm:70},{num:5,name:'(ILY) Malachie Raphael',truck:'176',cpm:65},{num:6,name:'(ILY) Pierre Silaire',truck:'10',cpm:null}]},
+  {name:'HUGO / FREDDY',drivers:[{num:1,name:'(ILY) Walkins Severe',truck:'145',cpm:72},{num:2,name:'(ILY) Mackenson Abraham',truck:'155',cpm:63},{num:3,name:'(ILY DN) Lomas Donald',truck:'191',cpm:70},{num:4,name:'(ILY) Dieulepere Minor',truck:'841990',cpm:70},{num:5,name:'(ILY) Garcia Carlos',truck:'20347',cpm:70},{num:6,name:'(BOX) Frantzdy Paul',truck:'838898',cpm:63},{num:7,name:'(ILY) Bladjimy Exantus',truck:'159',cpm:63}]},
+  {name:'MYLES / THEODORE',drivers:[{num:1,name:'(ILY) Passos Cerqueira',truck:'139',cpm:70},{num:2,name:'(ILY) Glenn Hunter',truck:'838891',cpm:70},{num:3,name:'(BOX) Charles Wilguer',truck:'838892',cpm:70},{num:4,name:'(ILY) Stanley Larosiliere',truck:'838897',cpm:65},{num:5,name:'(ILY) Juan Carlos Franco',truck:'841074',cpm:null},{num:6,name:'(ILY) Nixon Belotte',truck:'130',cpm:65},{num:7,name:'(ILY) Joseph Antonio',truck:'1399',cpm:63}]},
+  {name:'AUSTIN / KENNEDY',drivers:[{num:1,name:'(ILY) Stanley Jules',truck:'10080',cpm:70},{num:2,name:'(ILY) Claudel Gressy',truck:'102',cpm:70},{num:3,name:'(ILY) Veillard Olivier',truck:'487040',cpm:65},{num:4,name:'(ILY) Widson Paul',truck:'121',cpm:70},{num:5,name:'(ILY) Chatelain Bagnio',truck:'841071',cpm:70}]},
+];
+const OFF_ST = ['HOME','RESET','OFF','OOS'];
 
-function setPendingStatus(s) { pendingGrossStatus = s; showToast('Click a day cell to stamp: ' + s); }
+function setPGS(s) { pendingGS = s; showToast('Click a cell to stamp: ' + s); }
 
 function getWeekDates(wk) {
-  const [y, w] = wk.split('-W');
-  const jan4 = new Date(parseInt(y), 0, 4);
-  const mon = new Date(jan4);
-  mon.setDate(jan4.getDate() - (jan4.getDay() || 7) + 1 + (parseInt(w) - 1) * 7);
-  return Array.from({length:7}, (_, i) => { const d = new Date(mon); d.setDate(mon.getDate() + i); return d; });
+  const [y,w]=wk.split('-W');
+  const jan4=new Date(parseInt(y),0,4);
+  const mon=new Date(jan4);
+  mon.setDate(jan4.getDate()-(jan4.getDay()||7)+1+(parseInt(w)-1)*7);
+  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return d;});
 }
-
-function fmtMD(d) { return (d.getMonth()+1) + '/' + d.getDate(); }
+function fmtMD(d){return(d.getMonth()+1)+'/'+d.getDate();}
 
 function renderGrossSheet() {
-  currentWeekKey = document.getElementById('gs-week').value;
-  const days = getWeekDates(currentWeekKey);
-  ['MON','TUE','WED','THU','FRI','SAT','SUN'].forEach((lbl, i) => {
-    const el = document.getElementById('gs-th-' + i);
-    if (el) el.textContent = lbl + '\n' + fmtMD(days[i]);
-  });
-
-  const tbody = document.getElementById('gs-tbody');
-  tbody.innerHTML = '';
-  let fleetGross = 0, fleetMiles = 0;
-
-  GS_DISPATCHERS.forEach((disp, di) => {
-    const hr = document.createElement('tr');
-    hr.className = 'gs-dispatcher-row';
-    hr.innerHTML = `<td colspan="15">${disp.name}</td>`;
-    tbody.appendChild(hr);
-
-    disp.drivers.forEach((drv, dri) => {
-      const id = `gs_${di}_${dri}`;
-      const saved = (grossData[currentWeekKey] && grossData[currentWeekKey][id])
-        ? grossData[currentWeekKey][id]
-        : { days: Array(7).fill(null).map(()=>({gross:'',miles:''})), notes:'' };
-
-      let dayCells = '';
-      for (let d = 0; d < 7; d++) {
-        const g = saved.days[d].gross || '';
-        const m = saved.days[d].miles || '';
-        const isOff = OFF_STATUSES.includes(g.toString().toUpperCase());
-        const cellClass = isOff ? (g.toUpperCase() === 'HOME' ? 'gs-home-cell' : 'gs-reset-cell') : '';
-        dayCells += `<td class="gs-day ${cellClass}" id="gsdc-${id}-${d}">
-          <input class="gi" type="text" value="${g}" placeholder="$"
-            onchange="onGrossChange('${id}',${d},this)"
-            onfocus="onGrossFocus('${id}',${d})">
-          <input class="mi" type="number" value="${m}" placeholder="mi"
-            onchange="onMilesChange('${id}',${d},this)">
-        </td>`;
+  currentWeek=document.getElementById('gs-week').value;
+  const days=getWeekDates(currentWeek);
+  ['MON','TUE','WED','THU','FRI','SAT','SUN'].forEach((l,i)=>{const el=document.getElementById('gth-'+i);if(el)el.textContent=l+'\n'+fmtMD(days[i]);});
+  const tbody=document.getElementById('gs-tbody');
+  tbody.innerHTML='';
+  let fg=0,fm=0;
+  GS_DISPATCHERS.forEach((disp,di)=>{
+    const hr=document.createElement('tr');hr.className='gs-disp-row';hr.innerHTML=`<td colspan="15">${disp.name}</td>`;tbody.appendChild(hr);
+    disp.drivers.forEach((drv,dri)=>{
+      const id=`gs_${di}_${dri}`;
+      const saved=(grossData[currentWeek]&&grossData[currentWeek][id])?grossData[currentWeek][id]:{days:Array(7).fill(null).map(()=>({gross:'',miles:''})),notes:''};
+      let dayCells='';
+      for(let d=0;d<7;d++){
+        const g=saved.days[d].gross||'',m=saved.days[d].miles||'';
+        const isOff=OFF_ST.includes(g.toString().toUpperCase());
+        const cc=isOff?(g.toUpperCase()==='HOME'?'gs-home-cell':'gs-reset-cell'):'';
+        dayCells+=`<td class="gs-day ${cc}" id="gsdc-${id}-${d}"><input class="gi" type="text" value="${g}" placeholder="$" onchange="onGC('${id}',${d},this)" onfocus="onGF('${id}',${d})"><input class="mi" type="number" value="${m}" placeholder="mi" onchange="onMC('${id}',${d},this)"></td>`;
       }
-
-      const tr = document.createElement('tr');
-      tr.id = 'gsr-' + id;
-      tr.innerHTML = `
-        <td class="gs-truck" style="font-size:10px;color:#6b7490;">${drv.num}</td>
-        <td class="gs-driver-name">${drv.name}<br><span style="color:#4a5570;font-size:9px;">${drv.cpm ? drv.cpm + 'CPM' : 'OO'}</span></td>
-        <td class="gs-truck">${drv.truck}</td>
-        ${dayCells}
-        <td class="gs-gross" id="gs-gross-${id}">$0</td>
-        <td class="gs-ou-zero" id="gs-ou-${id}">$0</td>
-        <td class="gs-rpm" id="gs-rpm-${id}">—</td>
-        <td class="gs-miles" id="gs-miles-${id}">0</td>
-        <td style="background:#111827;padding:3px;"><input type="text" value="${saved.notes||''}" placeholder="Notes..." style="width:100%;background:#0a0d14;border:1px solid #1e2535;border-radius:4px;color:#9ca3af;font-size:10px;padding:3px 5px;outline:none;" onchange="onNotes('${id}',this)"></td>
-      `;
+      const tr=document.createElement('tr');tr.id='gsr-'+id;
+      tr.innerHTML=`<td class="gs-truck" style="font-size:10px;color:#6b7490;">${drv.num}</td><td class="gs-drv">${drv.name}<br><span style="color:#4a5570;font-size:9px;">${drv.cpm?drv.cpm+'CPM':'OO'}</span></td><td class="gs-truck">${drv.truck}</td>${dayCells}<td class="gs-gross" id="gs-gross-${id}">$0</td><td class="gs-ou-zero" id="gs-ou-${id}">$0</td><td class="gs-rpm" id="gs-rpm-${id}">—</td><td class="gs-miles" id="gs-miles-${id}">0</td><td style="background:#111827;padding:2px;"><input type="text" value="${saved.notes||''}" placeholder="Notes..." style="width:100%;background:#0a0d14;border:1px solid #1e2535;border-radius:4px;color:#9ca3af;font-size:10px;padding:3px 4px;outline:none;" onchange="onGN('${id}',this)"></td>`;
       tbody.appendChild(tr);
-      const { g: tg, m: tm } = calcDriverRow(id);
-      fleetGross += tg; fleetMiles += tm;
+      const{g:tg,m:tm}=calcGSRow(id);fg+=tg;fm+=tm;
     });
   });
-
-  updateFleetGrossSummary(fleetGross, fleetMiles);
+  updateGSSummary(fg,fm);
 }
 
-function ensureGrossData(id) {
-  if (!grossData[currentWeekKey]) grossData[currentWeekKey] = {};
-  if (!grossData[currentWeekKey][id]) grossData[currentWeekKey][id] = { days: Array(7).fill(null).map(()=>({gross:'',miles:''})), notes:'' };
+function ensureGD(id){if(!grossData[currentWeek])grossData[currentWeek]={};if(!grossData[currentWeek][id])grossData[currentWeek][id]={days:Array(7).fill(null).map(()=>({gross:'',miles:''})),notes:''};}
+function onGF(id,day){if(pendingGS){ensureGD(id);grossData[currentWeek][id].days[day].gross=pendingGS;const inp=document.querySelector(`#gsdc-${id}-${day} .gi`);if(inp){inp.value=pendingGS;onGC(id,day,inp);}pendingGS=null;}}
+function onGC(id,day,el){ensureGD(id);grossData[currentWeek][id].days[day].gross=el.value;const v=el.value.toString().toUpperCase();const isOff=OFF_ST.includes(v);const dc=document.getElementById(`gsdc-${id}-${day}`);if(dc)dc.className='gs-day'+(isOff?(v==='HOME'?' gs-home-cell':' gs-reset-cell'):'');logActivity('Updated gross sheet',`${id} Day ${day}: ${el.value}`);calcGSRow(id);recalcGS();}
+function onMC(id,day,el){ensureGD(id);grossData[currentWeek][id].days[day].miles=el.value;calcGSRow(id);recalcGS();}
+function onGN(id,el){ensureGD(id);grossData[currentWeek][id].notes=el.value;}
+
+function calcGSRow(id){
+  const data=(grossData[currentWeek]&&grossData[currentWeek][id])?grossData[currentWeek][id]:{days:Array(7).fill(null).map(()=>({gross:'',miles:''}))};
+  let tg=0,tm=0,od=0;
+  data.days.forEach(d=>{const gs=(d.gross||'').toString().toUpperCase();if(OFF_ST.includes(gs))od++;else{const n=parseFloat(d.gross);if(!isNaN(n))tg+=n;}const m=parseFloat(d.miles);if(!isNaN(m))tm+=m;});
+  const target=12000-1714*od;const ou=tg-target;const rpm=tm>0?tg/tm:null;
+  const gEl=document.getElementById(`gs-gross-${id}`);const ouEl=document.getElementById(`gs-ou-${id}`);const rEl=document.getElementById(`gs-rpm-${id}`);const mEl=document.getElementById(`gs-miles-${id}`);
+  if(gEl)gEl.textContent='$'+tg.toLocaleString();if(mEl)mEl.textContent=tm.toLocaleString();
+  if(rEl){if(rpm!==null){rEl.textContent='$'+rpm.toFixed(2);rEl.style.color=rpm>=2.5?'#4ade80':'#f87171';}else rEl.textContent='—';}
+  if(ouEl){ouEl.textContent=(ou>=0?'+$':'-$')+Math.abs(Math.round(ou)).toLocaleString();ouEl.className=ou>0?'gs-ou-pos':ou<0?'gs-ou-neg':'gs-ou-zero';}
+  return{g:tg,m:tm};
 }
 
-function onGrossFocus(id, day) {
-  if (pendingGrossStatus) {
-    ensureGrossData(id);
-    grossData[currentWeekKey][id].days[day].gross = pendingGrossStatus;
-    const inp = document.querySelector(`#gsdc-${id}-${day} .gi`);
-    if (inp) { inp.value = pendingGrossStatus; onGrossChange(id, day, inp); }
-    pendingGrossStatus = null;
-  }
+function recalcGS(){let fg=0,fm=0;GS_DISPATCHERS.forEach((d,di)=>d.drivers.forEach((_,dri)=>{const{g,m}=calcGSRow(`gs_${di}_${dri}`);fg+=g;fm+=m;}));updateGSSummary(fg,fm);}
+
+function updateGSSummary(fg,fm){
+  const total=GS_DISPATCHERS.reduce((a,d)=>a+d.drivers.length,0);
+  const ou=fg-12000*total;const rpm=fm>0?fg/fm:0;
+  document.getElementById('gs-total-gross').textContent='$'+fg.toLocaleString();
+  document.getElementById('gs-total-miles').textContent=fm.toLocaleString();
+  document.getElementById('gs-avg-rpm').textContent='$'+rpm.toFixed(2);
+  const ouEl=document.getElementById('gs-fleet-ou');ouEl.textContent=(ou>=0?'+$':'-$')+Math.abs(Math.round(ou)).toLocaleString();ouEl.style.color=ou>=0?'#4ade80':'#f87171';
 }
 
-function onGrossChange(id, day, el) {
-  ensureGrossData(id);
-  grossData[currentWeekKey][id].days[day].gross = el.value;
-  const val = el.value.toString().toUpperCase();
-  const isOff = OFF_STATUSES.includes(val);
-  const dc = document.getElementById(`gsdc-${id}-${day}`);
-  if (dc) dc.className = 'gs-day' + (isOff ? (val==='HOME'?' gs-home-cell':' gs-reset-cell') : '');
-  calcDriverRow(id);
-  recalcFleetGross();
-}
-
-function onMilesChange(id, day, el) {
-  ensureGrossData(id);
-  grossData[currentWeekKey][id].days[day].miles = el.value;
-  calcDriverRow(id);
-  recalcFleetGross();
-}
-
-function onNotes(id, el) { ensureGrossData(id); grossData[currentWeekKey][id].notes = el.value; }
-
-function calcDriverRow(id) {
-  const data = (grossData[currentWeekKey] && grossData[currentWeekKey][id])
-    ? grossData[currentWeekKey][id]
-    : { days: Array(7).fill(null).map(()=>({gross:'',miles:''})) };
-
-  let tg = 0, tm = 0, offDays = 0;
-  data.days.forEach(d => {
-    const gs = (d.gross || '').toString().toUpperCase();
-    if (OFF_STATUSES.includes(gs)) offDays++;
-    else { const n = parseFloat(d.gross); if (!isNaN(n)) tg += n; }
-    const m = parseFloat(d.miles); if (!isNaN(m)) tm += m;
-  });
-
-  const target = 12000 - 1714 * offDays;
-  const ou = tg - target;
-  const rpm = tm > 0 ? tg / tm : null;
-
-  const gEl = document.getElementById(`gs-gross-${id}`);
-  const ouEl = document.getElementById(`gs-ou-${id}`);
-  const rEl = document.getElementById(`gs-rpm-${id}`);
-  const mEl = document.getElementById(`gs-miles-${id}`);
-
-  if (gEl) gEl.textContent = '$' + tg.toLocaleString();
-  if (mEl) mEl.textContent = tm.toLocaleString();
-  if (rEl) {
-    if (rpm !== null) {
-      rEl.textContent = '$' + rpm.toFixed(2);
-      rEl.style.color = rpm >= 2.5 ? '#4ade80' : '#f87171';
-    } else rEl.textContent = '—';
-  }
-  if (ouEl) {
-    ouEl.textContent = (ou >= 0 ? '+$' : '-$') + Math.abs(Math.round(ou)).toLocaleString();
-    ouEl.className = ou > 0 ? 'gs-ou-pos' : ou < 0 ? 'gs-ou-neg' : 'gs-ou-zero';
-  }
-  return { g: tg, m: tm };
-}
-
-function recalcFleetGross() {
-  let fleetGross = 0, fleetMiles = 0;
-  GS_DISPATCHERS.forEach((disp, di) => {
-    disp.drivers.forEach((drv, dri) => {
-      const { g, m } = calcDriverRow(`gs_${di}_${dri}`);
-      fleetGross += g; fleetMiles += m;
-    });
-  });
-  updateFleetGrossSummary(fleetGross, fleetMiles);
-}
-
-function updateFleetGrossSummary(fg, fm) {
-  const totalTrucks = GS_DISPATCHERS.reduce((a, d) => a + d.drivers.length, 0);
-  const totalTarget = 12000 * totalTrucks;
-  const ou = fg - totalTarget;
-  const rpm = fm > 0 ? fg / fm : 0;
-  document.getElementById('gs-fleet-gross').textContent = '$' + fg.toLocaleString();
-  document.getElementById('gs-fleet-miles').textContent = fm.toLocaleString();
-  document.getElementById('gs-avg-rpm').textContent = '$' + rpm.toFixed(2);
-  const ouEl = document.getElementById('gs-fleet-ou');
-  ouEl.textContent = (ou >= 0 ? '+$' : '-$') + Math.abs(Math.round(ou)).toLocaleString();
-  ouEl.style.color = ou >= 0 ? '#4ade80' : '#f87171';
-}
-
-function saveGrossData() { showToast('Data saved for week ' + currentWeekKey); }
-function clearGrossWeek() {
-  if (!confirm('Clear all data for this week?')) return;
-  grossData[currentWeekKey] = {};
-  renderGrossSheet();
-}
+function saveGross(){logActivity('Saved gross sheet','Week: '+currentWeek);showToast('Saved!');}
+function clearGross(){if(!confirm('Clear this week?'))return;grossData[currentWeek]={};logActivity('Cleared gross sheet','Week: '+currentWeek);renderGrossSheet();}
 
 // ===== LOAD BOARD =====
-function setLBFilter(f, btn) {
-  lbFilter = f;
-  document.querySelectorAll('#page-loads .filter-pill').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderLoads();
-}
+const DEMO_LOADS = [
+  {id:'ld1',loadNumber:'66819920',broker:'Arrive Logistics',commodity:'General Freight',equipment:'53 Dry Van',rate:2850,loadedMiles:420,totalMiles:447,status:'unassigned',assignedDriver:null,source:'arrive@arrivelogistics.com',emailNotes:'From: Arrive Logistics\nSubject: Rate Confirmation #66819920\nDate: Apr 5, 2026',stops:[{stopNumber:1,type:'PU',company:'Amazon Fulfillment Center',address:'1000 Logistics Blvd',city:'Chicago',state:'IL',zip:'60601',date:'April 07, 2026',timeWindow:'08:00',reference:'AMZ-441092',instructions:'Dock 14, call 30 min before'},{stopNumber:2,type:'DEL',company:'Walmart Distribution',address:'500 Walmart Way',city:'Memphis',state:'TN',zip:'38101',date:'April 08, 2026',timeWindow:'06:00-14:00',reference:'WMT-88321',instructions:null}],specialInstructions:'12 straps needed.'},
+  {id:'ld2',loadNumber:'NTG-8812993',broker:'NTG (Nolan Transportation)',commodity:'Electronics',equipment:'53 Dry Van',rate:3200,loadedMiles:587,totalMiles:620,status:'assigned',assignedDriver:{name:'(ILY) Roobenco Gerbier',truck:'403634'},source:'loads@ntgfreight.com',emailNotes:'From: NTG Freight\nSubject: Load Offer NTG-8812993\nDate: Apr 5, 2026',stops:[{stopNumber:1,type:'PU',company:'Best Buy Distribution',address:'7601 Penn Ave S',city:'Richfield',state:'MN',zip:'55423',date:'April 06, 2026',timeWindow:'10:00',reference:'BBY-2026-441',instructions:null},{stopNumber:2,type:'DEL',company:'Best Buy Store #442',address:'4200 Conroy Rd',city:'Orlando',state:'FL',zip:'32839',date:'April 08, 2026',timeWindow:'08:00-16:00',reference:null,instructions:'Call receiver 1hr before'}],specialInstructions:null},
+  {id:'ld3',loadNumber:'ECHO-445521',broker:'Echo Logistics',commodity:'Auto Parts',equipment:'Vented Van',rate:1950,loadedMiles:312,totalMiles:340,status:'unassigned',assignedDriver:null,source:'dispatch@echo.com',emailNotes:'From: Echo Logistics\nSubject: Load Confirmation ECHO-445521\nDate: Apr 5, 2026',stops:[{stopNumber:1,type:'PU',company:'AutoZone Distribution',address:'123 Commerce Dr',city:'Memphis',state:'TN',zip:'38118',date:'April 07, 2026',timeWindow:'14:00',reference:'AZ-88421',instructions:'Vented van required'},{stopNumber:2,type:'DEL',company:'AutoZone #8821',address:'5400 Buford Hwy',city:'Atlanta',state:'GA',zip:'30340',date:'April 08, 2026',timeWindow:'07:00-15:00',reference:null,instructions:null}],specialInstructions:'Vented van — do not seal doors'},
+  {id:'ld4',loadNumber:'ARR-992341',broker:'Arrive Logistics',commodity:'Home Goods',equipment:'53 Dry Van',rate:4100,loadedMiles:1240,totalMiles:1280,status:'sent',assignedDriver:{name:'(ILY) Glenn Hunter',truck:'838891'},source:'arrive@arrivelogistics.com',emailNotes:'From: Arrive Logistics\nSubject: Rate Confirmation ARR-992341\nDate: Apr 4, 2026',stops:[{stopNumber:1,type:'PU',company:'IKEA Distribution Center',address:'2901 Bellingham Dr',city:'Dallas',state:'TX',zip:'75201',date:'April 05, 2026',timeWindow:'06:00',reference:'IKEA-TX-441',instructions:'Scale after pickup'},{stopNumber:2,type:'DEL',company:'IKEA Store Tampa',address:'1700 E Busch Blvd',city:'Tampa',state:'FL',zip:'33612',date:'April 07, 2026',timeWindow:'08:00-17:00',reference:null,instructions:null}],specialInstructions:'12 straps required'},
+];
 
-function drvOpts(sel) {
-  const all = [];
-  GS_DISPATCHERS.forEach(d => d.drivers.forEach(drv => all.push(drv)));
-  let h = '<option value="">— Assign Driver —</option>';
-  GS_DISPATCHERS.forEach(disp => {
-    h += `<optgroup label="${disp.name}">`;
-    disp.drivers.forEach(d => {
-      const v = JSON.stringify({name:d.name, truck:d.truck});
-      h += `<option value='${v}' ${sel===d.name?'selected':''}>${d.name} (#${d.truck})</option>`;
-    });
-    h += '</optgroup>';
-  });
+function setLBF(f,btn){lbFilter=f;document.querySelectorAll('#page-loads .fpill').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderLoads();}
+
+function drvOpts(sel){
+  let h='<option value="">— Assign Driver —</option>';
+  GS_DISPATCHERS.forEach(d=>{h+=`<optgroup label="${d.name}">`;d.drivers.forEach(drv=>{const v=JSON.stringify({name:drv.name,truck:drv.truck});h+=`<option value='${v}' ${sel===drv.name?'selected':''}>${drv.name} (#${drv.truck})</option>`;});h+='</optgroup>';});
   return h;
 }
 
-function renderLoads() {
-  const filtered = lbFilter === 'all' ? loads : loads.filter(l => l.status === lbFilter);
-  document.getElementById('lb-total').textContent = loads.length;
-  document.getElementById('lb-unassigned').textContent = loads.filter(l=>l.status==='unassigned').length;
-  document.getElementById('lb-assigned').textContent = loads.filter(l=>l.status==='assigned').length;
-  document.getElementById('lb-sent').textContent = loads.filter(l=>l.status==='sent').length;
-
-  const board = document.getElementById('load-board');
-  if (!filtered.length) { board.innerHTML = `<div style="text-align:center;padding:30px;color:#4a5570;font-size:13px;">No loads — scan inbox to create loads automatically</div>`; return; }
-
-  board.innerHTML = filtered.map(load => {
-    const stops = (load.stops||[]).map(s => `
-      <div class="lc-stop">
-        <span class="stag ${s.type==='PU'?'tag-pu':'tag-del'}">${s.type}</span>
-        <div class="stop-info">
-          <div style="font-weight:600;color:#f9fafb;">${s.date} @ ${s.timeWindow}</div>
-          <div>${s.company}</div>
-          <div style="color:#9ca3af;">${s.address}, ${s.city}, ${s.state} ${s.zip}</div>
-          ${s.reference?`<div style="color:#6b7280;font-size:11px;">Ref: ${s.reference}</div>`:''}
-          ${s.instructions?`<div style="color:#f4a935;font-size:11px;">⚠ ${s.instructions}</div>`:''}
-        </div>
-      </div>`).join('');
-
-    const badge = load.status==='sent'
-      ? '<span style="background:#0a1a2e;color:#60a5fa;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;">✓ Sent</span>'
-      : load.status==='assigned'
-      ? '<span style="background:#0f2d1a;color:#4ade80;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;">Assigned</span>'
-      : '<span style="background:#3d2900;color:#f4a935;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;">Unassigned</span>';
-
-    return `<div class="load-card ${load.status}">
-      <div class="lc-head">
-        <span class="lc-num">Load # ${load.loadNumber}</span>
-        <span class="lc-broker">${load.broker} · ${load.source}</span>
-        ${load.rate?`<span class="lc-rate">$${Number(load.rate).toLocaleString()}</span>`:''}
-        ${badge}
-      </div>
-      <div class="lc-body">
-        <div style="display:flex;flex-direction:column;gap:6px;">${stops}</div>
-        ${load.emailNotes?`<div style="background:#1a2035;border:1px solid #2d3748;border-radius:7px;padding:8px 12px;font-size:11px;color:#9ca3af;line-height:1.6;"><strong style="color:#d1d5db;display:block;margin-bottom:3px;">📧 Email Notes</strong>${load.emailNotes}</div>`:''}
-        ${load.specialInstructions?`<div style="background:#2d1f00;border:1px solid #f4a935;border-radius:7px;padding:8px 12px;font-size:12px;color:#fbbf24;">⚠ ${load.specialInstructions}</div>`:''}
-        <div class="lc-actions">
-          <select class="drv-sel" id="drv-${load.id}">${drvOpts(load.assignedDriver?.name)}</select>
-          <button class="btn" onclick="assignDriver('${load.id}')" style="padding:8px 16px;font-size:13px;">Assign</button>
-          <button class="btn-sec" onclick="openMsgModal('${load.id}')" ${!load.assignedDriver?'disabled':''} style="padding:8px 14px;font-size:12px;">📱 Message</button>
-          <button class="btn-sec" onclick="loads=loads.filter(l=>l.id!=='${load.id}');renderLoads();" style="padding:8px 12px;font-size:12px;">🗑</button>
-        </div>
-      </div>
-    </div>`;
+function renderLoads(){
+  const filtered=lbFilter==='all'?loads:loads.filter(l=>l.status===lbFilter);
+  document.getElementById('lb-total').textContent=loads.length;
+  document.getElementById('lb-unassigned').textContent=loads.filter(l=>l.status==='unassigned').length;
+  document.getElementById('lb-assigned').textContent=loads.filter(l=>l.status==='assigned').length;
+  document.getElementById('lb-sent').textContent=loads.filter(l=>l.status==='sent').length;
+  const board=document.getElementById('load-board');
+  if(!filtered.length){board.innerHTML=`<div style="text-align:center;padding:30px;color:#4a5570;font-size:13px;">No loads — scan inbox or check the email scanner</div>`;return;}
+  const canEdit=(ROLE_CAN_EDIT[currentUser?.role]||[]).includes('loads');
+  board.innerHTML=filtered.map(load=>{
+    const stops=(load.stops||[]).map(s=>`<div class="lc-stop"><span class="stag ${s.type==='PU'?'tag-pu':'tag-del'}">${s.type}</span><div class="stop-info"><div style="font-weight:600;color:#f9fafb;">${s.date} @ ${s.timeWindow}</div><div>${s.company}</div><div style="color:#9ca3af;">${s.address}, ${s.city}, ${s.state} ${s.zip}</div>${s.reference?`<div style="color:#6b7280;font-size:11px;">Ref: ${s.reference}</div>`:''}${s.instructions?`<div style="color:#f4a935;font-size:11px;">⚠ ${s.instructions}</div>`:''}</div></div>`).join('');
+    const badge=load.status==='sent'?'<span style="background:#0a1a2e;color:#60a5fa;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;">✓ Sent</span>':load.status==='assigned'?'<span style="background:#0f2d1a;color:#4ade80;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;">Assigned</span>':'<span style="background:#3d2900;color:#f4a935;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;">Unassigned</span>';
+    return`<div class="load-card ${load.status}"><div class="lc-head"><span class="lc-num">Load # ${load.loadNumber}</span><span class="lc-broker">${load.broker}</span>${load.rate?`<span class="lc-rate">$${Number(load.rate).toLocaleString()}</span>`:''} ${badge}</div><div class="lc-body"><div style="display:flex;flex-direction:column;gap:6px;">${stops}</div>${load.emailNotes?`<div style="background:#1a2035;border:1px solid #2d3748;border-radius:7px;padding:8px 12px;font-size:11px;color:#9ca3af;line-height:1.6;"><strong style="color:#d1d5db;display:block;margin-bottom:3px;">📧 Email Notes</strong>${load.emailNotes}</div>`:''} ${load.specialInstructions?`<div style="background:#2d1f00;border:1px solid #f4a935;border-radius:7px;padding:8px 12px;font-size:12px;color:#fbbf24;">⚠ ${load.specialInstructions}</div>`:''}<div class="lc-actions">${canEdit?`<select class="drv-sel" id="drv-${load.id}">${drvOpts(load.assignedDriver?.name)}</select><button class="btn" onclick="assignDriver('${load.id}')" style="padding:7px 14px;font-size:12px;">Assign</button>`:`<span style="font-size:12px;color:${load.assignedDriver?'#4ade80':'#f87171'};">${load.assignedDriver?'Driver: '+load.assignedDriver.name:'No driver assigned'}</span>`}<button class="btn-sec" onclick="openMsgModal('${load.id}')" ${!load.assignedDriver?'disabled':''} style="padding:7px 12px;font-size:12px;">📱 Message</button>${canEdit?`<button class="btn-sec" onclick="loads=loads.filter(l=>l.id!=='${load.id}');logActivity('Removed load','Load #${load.loadNumber}');renderLoads();" style="padding:7px 10px;font-size:12px;">🗑</button>`:''}</div></div></div>`;
   }).join('');
 }
 
-function assignDriver(id) {
-  const sel = document.getElementById('drv-' + id);
-  if (!sel?.value) { showToast('Select a driver first', 'err'); return; }
-  const drv = JSON.parse(sel.value);
-  const load = loads.find(l => l.id === id);
-  if (!load) return;
-  load.assignedDriver = drv;
-  load.status = 'assigned';
-  renderLoads();
-  showToast('Assigned to ' + drv.name);
+function assignDriver(id){
+  const sel=document.getElementById('drv-'+id);if(!sel?.value){showToast('Select a driver','err');return;}
+  const drv=JSON.parse(sel.value);const load=loads.find(l=>l.id===id);if(!load)return;
+  const old=load.assignedDriver?.name||'none';
+  load.assignedDriver=drv;load.status='assigned';
+  logActivity('Assigned driver to load',`Load #${load.loadNumber} → ${drv.name} (#${drv.truck})`);
+  renderLoads();showToast('Assigned to '+drv.name);
 }
 
-function clearLoads() { if (!confirm('Clear all loads?')) return; loads = []; renderLoads(); }
+function clearLoads(){if(!confirm('Clear all loads?'))return;loads=[];logActivity('Cleared all loads','');renderLoads();}
+
+// ===== AI PICKS =====
+const BROKER_AVAILABLE = [
+  {id:'ba1',broker:'Arrive Logistics',route:'Orlando, FL → Chicago, IL',pickup:'Apr 7, 08:00',miles:1100,rate:3200,rpm:2.91,equip:'53 Dry Van',requirements:''},
+  {id:'ba2',broker:'NTG',route:'Memphis, TN → Denver, CO',pickup:'Apr 7, 14:00',miles:1050,rate:3100,rpm:2.95,equip:'53 Dry Van',requirements:'12 straps'},
+  {id:'ba3',broker:'Echo Logistics',route:'Atlanta, GA → Dallas, TX',pickup:'Apr 8, 06:00',miles:780,rate:2200,rpm:2.82,equip:'Vented Van',requirements:'Vented van'},
+  {id:'ba4',broker:'Arrive Logistics',route:'Chicago, IL → Los Angeles, CA',pickup:'Apr 7, 22:00',miles:2015,rate:5800,rpm:2.88,equip:'53 Dry Van',requirements:'Team preferred'},
+  {id:'ba5',broker:'NTG',route:'Dallas, TX → Miami, FL',pickup:'Apr 8, 10:00',miles:1320,rate:3900,rpm:2.95,equip:'Reefer',requirements:'Reefer + temp log'},
+  {id:'ba6',broker:'Echo Logistics',route:'Columbus, OH → Houston, TX',pickup:'Apr 7, 18:00',miles:1180,rate:3300,rpm:2.80,equip:'53 Dry Van',requirements:''},
+  {id:'ba7',broker:'Arrive Logistics',route:'Groveport, OH → Charlotte, NC',pickup:'Apr 6, 16:00',miles:490,rate:1550,rpm:3.16,equip:'53 Dry Van',requirements:''},
+  {id:'ba8',broker:'NTG',route:'Danville, VA → Atlanta, GA',pickup:'Apr 6, 20:00',miles:520,rate:1600,rpm:3.08,equip:'53 Dry Van',requirements:''},
+];
+
+function generateAIPicks() {
+  const container = document.getElementById('ai-picks-container');
+  container.innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af;"><span class="spinner"></span>Analyzing fleet positions and gross gaps...</div>';
+  setTimeout(() => {
+    const ready = FLEET.filter(t => t.status === 'Ready' || t.status === 'Dhding');
+    const eta = FLEET.filter(t => t.status === 'ETA' || t.status === 'Unloading');
+    let html = '';
+    const picks = [
+      { truck: FLEET[15], reason: 'Truck #102 (Claudel Gressy) is READY in Danville, VA. Currently at $0 gross — needs a full week load. Best match: NTG load Danville → Atlanta at $1,600 ($3.08/mi). Boards well into the week.', loads: ['ba8','ba4'] },
+      { truck: FLEET[16], reason: 'Truck #487040 (Veillard Olivier) is READY in Suffolk, VA — just 90 miles from a high-paying Chicago load. Groveport → Charlotte at $1,550 ($3.16/mi) would position for a longer midwest load after.', loads: ['ba7','ba1'] },
+      { truck: FLEET[22], reason: 'Truck #838898 (Frantzdy Paul) is DEADHEADING to Chicago, IL. Intercept the Columbus → Houston load at $3,300 ($2.80/mi) — 400 mile deadhead but $3.80/mi effective after deducting deadhead cost. Saves 3 days of empty miles.', loads: ['ba6'] },
+      { truck: FLEET[13], reason: 'Truck #838892 (Charles Wilguer) is UNLOADING in Pooler, GA near Atlanta. Echo load Atlanta → Dallas at $2,200 ($2.82/mi) picks up Apr 8 — perfect positioning after delivery.', loads: ['ba3'] },
+    ];
+    picks.forEach(pick => {
+      const t = pick.truck;
+      const matchedLoads = BROKER_AVAILABLE.filter(b => pick.loads.includes(b.id));
+      html += `<div class="ai-card">
+        <div class="ai-card-title">🤖 ${t.driver} — Truck #${t.truck}
+          <span class="sbadge ${STATUS_CLASS[t.status]||'s-ready'}" style="font-size:10px;">${t.status}</span>
+          <span style="font-size:11px;color:#9ca3af;font-family:'Barlow',sans-serif;font-weight:400;"> in ${t.loc}</span>
+        </div>
+        <div class="ai-reason">${pick.reason}</div>
+        <div class="ai-loads">
+          ${matchedLoads.map(l=>`<div class="ai-load-item">
+            <div class="ai-load-route">${l.route} · ${l.equip}${l.requirements?` · <span style="color:#f4a935;">${l.requirements}</span>`:''}<br><span style="font-size:11px;color:#9ca3af;">${l.broker} · Pickup: ${l.pickup} · ${l.miles.toLocaleString()} mi</span></div>
+            <div><div class="ai-load-rate">$${l.rate.toLocaleString()}</div><div class="ai-load-rpm">$${l.rpm.toFixed(2)}/mi</div></div>
+            <button class="btn" onclick="bookBrokerLoad('${l.id}')" style="font-size:11px;padding:6px 12px;">Book →</button>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    });
+    container.innerHTML = html;
+    logActivity('Generated AI load picks', `${picks.length} recommendations created`);
+  }, 1200);
+}
+
+function refreshBrokerLoads() {
+  const c = document.getElementById('broker-loads');
+  c.innerHTML = '<div style="text-align:center;padding:14px;color:#9ca3af;"><span class="spinner"></span>Fetching available loads...</div>';
+  setTimeout(() => {
+    c.innerHTML = BROKER_AVAILABLE.map(l => `
+      <div class="ai-load-item" style="margin-bottom:8px;">
+        <div style="width:80px;flex-shrink:0;"><span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${l.broker==='Arrive Logistics'?'#3d2900':l.broker==='NTG'?'#0a1a2e':'#0f2d1a'};color:${l.broker==='Arrive Logistics'?'#f4a935':l.broker==='NTG'?'#60a5fa':'#4ade80'};">${l.broker==='Arrive Logistics'?'ARRIVE':l.broker==='NTG'?'NTG':'ECHO'}</span></div>
+        <div class="ai-load-route" style="flex:1;">${l.route}<br><span style="font-size:11px;color:#9ca3af;">${l.equip} · ${l.miles.toLocaleString()} mi · PU: ${l.pickup}${l.requirements?` · <span style="color:#f4a935;">${l.requirements}</span>`:''}</span></div>
+        <div style="text-align:right;flex-shrink:0;"><div class="ai-load-rate">$${l.rate.toLocaleString()}</div><div class="ai-load-rpm" style="color:${l.rpm>=2.5?'#4ade80':'#f87171'};">$${l.rpm.toFixed(2)}/mi</div></div>
+        <button class="btn" onclick="bookBrokerLoad('${l.id}')" style="font-size:11px;padding:6px 12px;">Book</button>
+      </div>`).join('');
+  }, 800);
+}
+
+function bookBrokerLoad(id) {
+  const load = BROKER_AVAILABLE.find(l=>l.id===id);
+  if (!load) return;
+  const newLoad = {id:'ld_'+Date.now(),loadNumber:'BKD-'+Date.now().toString().slice(-6),broker:load.broker,commodity:'Freight',equipment:load.equip,rate:load.rate,loadedMiles:load.miles,totalMiles:load.miles+50,status:'unassigned',assignedDriver:null,source:'broker portal',emailNotes:`Route: ${load.route}\nPickup: ${load.pickup}\nMiles: ${load.miles}\nRequirements: ${load.requirements||'None'}`,stops:[{stopNumber:1,type:'PU',company:'Shipper',address:'',city:load.route.split('→')[0].trim().split(',')[0],state:load.route.split('→')[0].trim().split(',')[1]?.trim()||'',zip:'',date:load.pickup.split(',')[0],timeWindow:load.pickup.split(',')[1]?.trim()||'TBD',reference:null,instructions:load.requirements||null},{stopNumber:2,type:'DEL',company:'Consignee',address:'',city:load.route.split('→')[1].trim().split(',')[0],state:load.route.split('→')[1].trim().split(',')[1]?.trim()||'',zip:'',date:'TBD',timeWindow:'TBD',reference:null,instructions:null}],specialInstructions:load.requirements||null};
+  loads.unshift(newLoad);
+  logActivity('Booked load from broker board',`${load.broker} — ${load.route} — $${load.rate.toLocaleString()}`);
+  renderLoads();
+  showPage('loads', document.getElementById('tnav-loads'));
+  document.getElementById('tnav-loads').click();
+  showToast('Load booked! Check Load Board.');
+}
 
 // ===== MESSAGE MODAL =====
 function openMsgModal(id) {
-  const load = loads.find(l => l.id === id);
-  if (!load?.assignedDriver) { showToast('Assign a driver first', 'err'); return; }
-  currentMsgLoadId = id;
-  document.getElementById('modal-title').textContent = 'Driver Message — Load #' + load.loadNumber;
-  document.getElementById('modal-driver').textContent = load.assignedDriver.name + ' · Truck #' + load.assignedDriver.truck;
-  document.getElementById('modal-notes').value = load.customNotes || '';
+  const load=loads.find(l=>l.id===id);if(!load?.assignedDriver){showToast('Assign a driver first','err');return;}
+  currentMsgLoadId=id;
+  document.getElementById('modal-title').textContent='Driver Message — Load #'+load.loadNumber;
+  document.getElementById('modal-driver').textContent=load.assignedDriver.name+' · Truck #'+load.assignedDriver.truck;
+  document.getElementById('modal-notes').value=load.customNotes||'';
   document.getElementById('msg-modal').classList.add('on');
-  generateMsg(load);
+  genMsg(load);
 }
 
-async function generateMsg(load) {
-  const out = document.getElementById('modal-msg');
-  out.className = 'msg-out loading';
-  out.innerHTML = '<span class="spinner"></span>Building driver message...';
-  const stops = (load.stops||[]).map((s,i) => `Stop ${i+1} (${s.type}): ${s.company}, ${s.address}, ${s.city} ${s.state} ${s.zip} — ${s.date} @ ${s.timeWindow}${s.reference?' Ref:'+s.reference:''}${s.instructions?' NOTE:'+s.instructions:''}`).join('\n');
-  const notes = load.customNotes || document.getElementById('modal-notes').value || '';
-  const prompt = `Generate a driver dispatch text message:\nDriver: ${load.assignedDriver.name}, Truck #${load.assignedDriver.truck}\nLoad #: ${load.loadNumber} | Broker: ${load.broker} | Rate: see rate con\nMiles: ${load.loadedMiles||'?'} loaded\n\nStops:\n${stops}\n${notes?'Extra: '+notes:''}\n\nFormat:\nHey [First Name]! 🚛\nLoad #: [num] | Broker: [name]\n━━━━━━━━━━━━━━━━━━\n📍 PICKUP\n[Company]\n[Full Address]\n📅 [Date] at [Time]${load.stops?.[0]?.reference?'\nRef: [ref]':''}\n━━━━━━━━━━━━━━━━━━\n📍 DELIVERY\n[Company]\n[Full Address]\n📅 [Date]: [Window]\n━━━━━━━━━━━━━━━━━━\n📏 [miles] loaded mi | 🚛 Truck #[truck]\n\n🔺 Do PTI before departure\n🔺 Send trailer photos to group\n🔺 Scale after pickup\n${notes?'🔺 '+notes:''}\nDrive safe! ✅\n\nReturn ONLY the message. Fill in all real data.`;
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:MODEL,max_tokens:700,system:'Generate driver dispatch messages. Return only the message.',messages:[{role:'user',content:prompt}]})});
-    const data = await res.json();
-    currentMsgText = data.content?.[0]?.text || 'Error generating message';
-    out.className = 'msg-out'; out.textContent = currentMsgText;
-  } catch(e) { out.className = 'msg-out'; out.textContent = 'Error: ' + e.message; }
+async function genMsg(load) {
+  const out=document.getElementById('modal-msg');out.className='msg-out loading';out.innerHTML='<span class="spinner"></span>Building message...';
+  const stops=(load.stops||[]).map((s,i)=>`Stop ${i+1} (${s.type}): ${s.company}, ${s.address}, ${s.city} ${s.state} ${s.zip} — ${s.date} @ ${s.timeWindow}${s.reference?' Ref:'+s.reference:''}${s.instructions?' NOTE:'+s.instructions:''}`).join('\n');
+  const notes=load.customNotes||document.getElementById('modal-notes').value||'';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:MODEL,max_tokens:700,system:'Generate driver dispatch messages with real load data. Return only the message.',messages:[{role:'user',content:`Generate driver dispatch text:\nDriver: ${load.assignedDriver.name}, Truck #${load.assignedDriver.truck}\nLoad #: ${load.loadNumber} | Broker: ${load.broker}\nMiles: ${load.loadedMiles||'?'} loaded\n\nStops:\n${stops}\n${notes?'Extra: '+notes:''}\n\nFormat:\nHey [First Name]! 🚛\nLoad #: [num] | Broker: [name]\n━━━━━━━━━━━━━━━━━━\n📍 PICKUP\n[Company]\n[Full Address]\n📅 [Date] at [Time]\n━━━━━━━━━━━━━━━━━━\n📍 DELIVERY\n[Company]\n[Full Address]\n📅 [Date]: [Window]\n━━━━━━━━━━━━━━━━━━\n📏 [miles] mi loaded | 🚛 Truck #[truck]\n\n🔺 Do PTI before departure\n🔺 Send trailer photos to group\n🔺 Scale after pickup\n${notes?'🔺 '+notes:''}\nDrive safe! ✅\n\nReturn ONLY the message.`}]})});
+    const data=await res.json();currentMsgText=data.content?.[0]?.text||'Error';out.className='msg-out';out.textContent=currentMsgText;
+  }catch(e){out.className='msg-out';out.textContent='Error: '+e.message;}
 }
 
-function regenMsg() { const l = loads.find(x => x.id === currentMsgLoadId); if (l) { l.customNotes = document.getElementById('modal-notes').value; generateMsg(l); } }
-function copyMsg() { navigator.clipboard.writeText(currentMsgText).then(() => showToast('Message copied!')).catch(() => { const t = document.createElement('textarea'); t.value = currentMsgText; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); showToast('Message copied!'); }); }
-function markSent() { const l = loads.find(x => x.id === currentMsgLoadId); if (l) { l.status = 'sent'; renderLoads(); closeModal(); showToast('Marked as sent!'); } }
-function closeModal() { document.getElementById('msg-modal').classList.remove('on'); currentMsgLoadId = null; }
+function regenMsg(){const l=loads.find(x=>x.id===currentMsgLoadId);if(l){l.customNotes=document.getElementById('modal-notes').value;genMsg(l);}}
+function copyMsg(){navigator.clipboard.writeText(currentMsgText).then(()=>showToast('Copied!')).catch(()=>{const t=document.createElement('textarea');t.value=currentMsgText;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);showToast('Copied!');});}
+function markSent(){const l=loads.find(x=>x.id===currentMsgLoadId);if(l){l.status='sent';logActivity('Marked load as sent','Load #'+l.loadNumber+' to '+l.assignedDriver.name);renderLoads();closeModal();showToast('Marked as sent!');}}
+function closeModal(){document.getElementById('msg-modal').classList.remove('on');currentMsgLoadId=null;}
 
 // ===== EMAIL SCANNER =====
-function connectGmail() {
-  const t = document.getElementById('token-input').value.trim();
-  if (!t || !t.startsWith('ya29.')) { showConnMsg('Token must start with ya29.', '#f87171'); return; }
-  gmailToken = t;
-  document.getElementById('email-conn-form').style.display = 'none';
-  document.getElementById('email-conn-ok').style.display = 'block';
-  showConnMsg('', '');
-  showToast('Gmail connected!');
-  emailLog('success', 'Gmail connected. Ready to scan.');
+function connectGmail(){
+  const t=document.getElementById('token-inp').value.trim();
+  if(!t||!t.startsWith('ya29.')){showConnMsg('Token must start with ya29.','#f87171');return;}
+  gmailToken=t;document.getElementById('email-conn-form').style.display='none';document.getElementById('email-conn-ok').style.display='block';
+  logActivity('Connected Gmail','');showToast('Gmail connected!');emailLog('success','Gmail connected.');
+}
+function showConnMsg(m,c){const el=document.getElementById('conn-msg');el.textContent=m;el.style.color=c;}
+function getNewToken(){window.open('https://accounts.google.com/o/oauth2/v2/auth?client_id=918818503699-ertq9deg2s5r6vc4mdnn9hu4jq2f5lvj.apps.googleusercontent.com&redirect_uri=https://claude.ai/new&response_type=token&scope=https://www.googleapis.com/auth/gmail.readonly&prompt=select_account','_blank');showConnMsg('Sign in → copy URL → paste part after access_token= above','#f4a935');}
+
+async function gmailGet(path){if(!gmailToken)throw new Error('Not connected');const res=await fetch('https://gmail.googleapis.com'+path,{headers:{Authorization:'Bearer '+gmailToken}});if(res.status===401){gmailToken=null;throw new Error('Token expired');}if(!res.ok)throw new Error('Gmail API error '+res.status);return res.json();}
+
+async function scanInbox(){
+  if(!gmailToken){showToast('Connect Gmail first','err');return;}
+  const btn=document.getElementById('scan-btn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Scanning...';
+  emailLog('info','Scanning inbox...');
+  try{
+    const kw=document.getElementById('scan-kw').value;const limit=document.getElementById('scan-max').value;
+    const data=await gmailGet(`/gmail/v1/users/me/messages?q=${encodeURIComponent(kw+' has:attachment')}&maxResults=${limit}`);
+    const msgs=data.messages||[];emailLog('info',`Found ${msgs.length} emails.`);let added=0;
+    for(const msg of msgs){if(emails.find(e=>e.id===msg.id))continue;try{const d=await gmailGet(`/gmail/v1/users/me/messages/${msg.id}?format=full`);const h=d.payload?.headers||[];const allParts=[];function cp(parts){if(!parts)return;for(const p of parts){allParts.push(p);if(p.parts)cp(p.parts);}}cp(d.payload?.parts||[]);const atts=allParts.filter(p=>p.filename&&p.filename.length>0&&p.body?.attachmentId&&p.filename.match(/\.(pdf|doc|docx|png|jpg|jpeg)$/i)).map(p=>({name:p.filename,id:p.body.attachmentId,mimeType:p.mimeType,msgId:msg.id}));emails.unshift({id:msg.id,from:h.find(x=>x.name==='From')?.value||'',subject:h.find(x=>x.name==='Subject')?.value||'',date:h.find(x=>x.name==='Date')?.value||'',snippet:d.snippet||'',attachments:atts,status:'new'});added++;}catch(e){}}
+    renderEmails();emailLog('success',`Done. ${added} new emails.`);showToast(`Found ${msgs.length} emails, ${added} new`);
+    logActivity('Scanned Gmail inbox',`Found ${msgs.length} emails, ${added} new`);
+  }catch(e){emailLog('error',e.message);showToast(e.message,'err');}
+  btn.disabled=false;btn.innerHTML='🔍 Scan Now';
 }
 
-function showConnMsg(msg, color) { const el = document.getElementById('conn-msg'); el.textContent = msg; el.style.color = color; }
-
-function getNewToken() {
-  window.open('https://accounts.google.com/o/oauth2/v2/auth?client_id=918818503699-ertq9deg2s5r6vc4mdnn9hu4jq2f5lvj.apps.googleusercontent.com&redirect_uri=https://claude.ai/new&response_type=token&scope=https://www.googleapis.com/auth/gmail.readonly&prompt=select_account', '_blank');
-  showConnMsg('Sign in → copy URL → paste part after access_token= and before &token_type above', '#f4a935');
-}
-
-async function gmailGet(path) {
-  if (!gmailToken) throw new Error('Not connected');
-  const res = await fetch('https://gmail.googleapis.com' + path, { headers: { Authorization: 'Bearer ' + gmailToken } });
-  if (res.status === 401) { gmailToken = null; throw new Error('Token expired — get a new token'); }
-  if (!res.ok) throw new Error('Gmail API error ' + res.status);
-  return res.json();
-}
-
-async function scanInbox() {
-  if (!gmailToken) { showToast('Connect Gmail first', 'err'); return; }
-  const btn = document.getElementById('scan-btn');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Scanning...';
-  emailLog('info', 'Scanning inbox...');
-  try {
-    const kw = document.getElementById('scan-kw').value;
-    const limit = document.getElementById('scan-max').value;
-    const data = await gmailGet(`/gmail/v1/users/me/messages?q=${encodeURIComponent(kw + ' has:attachment')}&maxResults=${limit}`);
-    const msgs = data.messages || [];
-    emailLog('info', `Found ${msgs.length} matching emails.`);
-    let added = 0;
-    for (const msg of msgs) {
-      if (emails.find(e => e.id === msg.id)) continue;
-      try {
-        const d = await gmailGet(`/gmail/v1/users/me/messages/${msg.id}?format=full`);
-        const h = d.payload?.headers || [];
-        const allParts = [];
-        function cp(parts) { if(!parts)return; for(const p of parts){allParts.push(p);if(p.parts)cp(p.parts);} }
-        cp(d.payload?.parts||[]);
-        const atts = allParts.filter(p=>p.filename&&p.filename.length>0&&p.body?.attachmentId&&p.filename.match(/\.(pdf|doc|docx|png|jpg|jpeg)$/i)).map(p=>({name:p.filename,id:p.body.attachmentId,mimeType:p.mimeType,msgId:msg.id}));
-        emails.unshift({ id:msg.id, from:h.find(x=>x.name==='From')?.value||'', subject:h.find(x=>x.name==='Subject')?.value||'', date:h.find(x=>x.name==='Date')?.value||'', snippet:d.snippet||'', attachments:atts, status:'new' });
-        added++;
-      } catch(e) {}
-    }
-    renderEmails();
-    emailLog('success', `Scan complete. ${added} new emails found.`);
-    showToast(`Found ${msgs.length} emails, ${added} new`);
-  } catch(e) { emailLog('error', e.message); showToast(e.message, 'err'); }
-  btn.disabled = false; btn.innerHTML = '🔍 Scan Now';
-}
-
-async function processEmail(id) {
-  const email = emails.find(e => e.id === id); if (!email) return;
-  email.status = 'processing'; renderEmails();
-  emailLog('info', `Processing: "${email.subject}"`);
-  try {
-    let created = 0;
-    for (const att of (email.attachments||[])) {
-      try {
-        const ad = await gmailGet(`/gmail/v1/users/me/messages/${att.msgId}/attachments/${att.id}`);
-        let b64 = ad.data.replace(/-/g,'+').replace(/_/g,'/');
-        while (b64.length % 4) b64 += '=';
-        const isImg = att.mimeType?.startsWith('image/');
-        const part = isImg ? {type:'image',source:{type:'base64',media_type:att.mimeType,data:b64}} : {type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}};
-        const EP = `Extract load info from this rate confirmation. Return ONLY valid JSON: {"loadNumber":"string","broker":"string","commodity":null,"equipment":null,"rate":null,"emptyMiles":null,"loadedMiles":null,"totalMiles":null,"weight":null,"stops":[{"stopNumber":1,"type":"PU","company":"string","address":"string","city":"string","state":"string","zip":"string","date":"string","timeWindow":"string","reference":null,"instructions":null}],"specialInstructions":null}`;
-        const res = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:MODEL,max_tokens:1500,system:'Extract load data from rate confirmations. Return ONLY valid JSON.',messages:[{role:'user',content:[part,{type:'text',text:EP}]}]})});
-        const data = await res.json();
-        const ld = JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
-        if (ld.loadNumber || ld.stops?.length) {
-          loads.unshift({...ld,id:'ld_'+Date.now()+'_'+Math.random().toString(36).slice(2),status:'unassigned',assignedDriver:null,source:email.from,emailNotes:`From: ${email.from}\nSubject: ${email.subject}\nDate: ${email.date}\n\n${email.snippet}`,createdAt:new Date().toISOString()});
-          created++; emailLog('success', `Load ${ld.loadNumber} extracted from ${att.name}`);
-        }
-      } catch(e) { emailLog('error', `Attachment failed: ${e.message}`); }
-    }
-    email.status = created > 0 ? 'done' : 'skipped';
-    if (created) renderLoads();
-  } catch(e) { email.status = 'failed'; emailLog('error', 'Failed: ' + e.message); }
+async function processEmail(id){
+  const email=emails.find(e=>e.id===id);if(!email)return;email.status='processing';renderEmails();emailLog('info',`Processing: "${email.subject}"`);
+  try{let created=0;for(const att of(email.attachments||[])){try{const ad=await gmailGet(`/gmail/v1/users/me/messages/${att.msgId}/attachments/${att.id}`);let b64=ad.data.replace(/-/g,'+').replace(/_/g,'/');while(b64.length%4)b64+='=';const isImg=att.mimeType?.startsWith('image/');const part=isImg?{type:'image',source:{type:'base64',media_type:att.mimeType,data:b64}}:{type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}};const EP=`Extract load info. Return ONLY valid JSON: {"loadNumber":"string","broker":"string","commodity":null,"equipment":null,"rate":null,"emptyMiles":null,"loadedMiles":null,"totalMiles":null,"weight":null,"stops":[{"stopNumber":1,"type":"PU","company":"string","address":"string","city":"string","state":"string","zip":"string","date":"string","timeWindow":"string","reference":null,"instructions":null}],"specialInstructions":null}`;const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:MODEL,max_tokens:1500,system:'Extract load data from rate confirmations. Return ONLY valid JSON.',messages:[{role:'user',content:[part,{type:'text',text:EP}]}]})});const data=await res.json();const ld=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());if(ld.loadNumber||ld.stops?.length){loads.unshift({...ld,id:'ld_'+Date.now()+'_'+Math.random().toString(36).slice(2),status:'unassigned',assignedDriver:null,source:email.from,emailNotes:`From: ${email.from}\nSubject: ${email.subject}\nDate: ${email.date}\n\n${email.snippet}`,createdAt:new Date().toISOString()});created++;emailLog('success',`Load extracted from ${att.name}`);logActivity('Extracted load from email',`${email.subject} → Load #${ld.loadNumber}`);}}catch(e){emailLog('error','Attachment failed: '+e.message);}}email.status=created>0?'done':'skipped';if(created)renderLoads();}catch(e){email.status='failed';emailLog('error','Failed: '+e.message);}
   renderEmails();
 }
 
-async function processAllEmails() {
-  const news = emails.filter(e => e.status === 'new');
-  if (!news.length) { showToast('No new emails'); return; }
-  for (const e of news) { await processEmail(e.id); await new Promise(r=>setTimeout(r,700)); }
-  showToast('Done! Check Load Board.');
+async function processAllEmails(){const news=emails.filter(e=>e.status==='new');if(!news.length){showToast('No new emails');return;}for(const e of news){await processEmail(e.id);await new Promise(r=>setTimeout(r,700));}showToast('Done! Check Load Board.');}
+
+function toggleAutoScan(){const btn=document.getElementById('auto-btn');if(autoOn){clearInterval(autoScanTimer);autoOn=false;btn.innerHTML='▶ Auto-Scan';emailLog('info','Auto-scan stopped.');}else{const mins=parseInt(document.getElementById('scan-auto').value);if(!mins){showToast('Select interval');return;}autoOn=true;btn.innerHTML='■ Stop';scanInbox().then(processAllEmails);autoScanTimer=setInterval(()=>{scanInbox().then(processAllEmails);},mins*60000);emailLog('success',`Auto-scan every ${mins} min.`);}}
+
+function setEF(f,btn){eFilter=f;document.querySelectorAll('#page-email .fpill').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderEmails();}
+function renderEmails(){
+  const filtered=eFilter==='all'?emails:emails.filter(e=>e.status===eFilter);
+  const c=document.getElementById('email-list');
+  if(!filtered.length){c.innerHTML=`<div style="text-align:center;padding:24px;color:#4a5570;font-size:13px;">${eFilter==='all'?'No emails':'No '+eFilter+' emails'}</div>`;return;}
+  c.innerHTML=filtered.map(e=>{const bc=e.status==='done'?'eb-done':e.status==='failed'?'eb-fail':e.status==='processing'?'eb-proc':'eb-new';const bl=e.status==='done'?'Done ✓':e.status==='failed'?'Failed ✗':e.status==='processing'?'Processing...':'New';const atts=(e.attachments||[]).map(a=>`<span style="background:#1a2035;border:1px solid #374151;border-radius:5px;padding:2px 9px;font-size:11px;color:#d1d5db;">📄 ${a.name}</span>`).join('');return`<div class="eitem ${e.status}"><div class="ehead" onclick="document.getElementById('eb-${e.id}').classList.toggle('open')"><span class="efrom">${e.from}</span><span style="font-size:11px;color:#6b7280;flex-shrink:0;">${e.date?.slice(0,16)||''}</span><span class="ebadge ${bc}">${bl}</span></div><div class="ebody" id="eb-${e.id}"><div style="font-size:13px;font-weight:600;color:#e5e7eb;">${e.subject}</div><div style="font-size:12px;color:#9ca3af;line-height:1.5;">${(e.snippet||'').slice(0,200)}</div>${atts?`<div style="display:flex;flex-wrap:wrap;gap:6px;">${atts}</div>`:''}<div style="display:flex;gap:8px;margin-top:4px;">${e.status!=='done'?`<button class="btn" onclick="processEmail('${e.id}')" style="padding:7px 12px;font-size:11px;">⚡ Extract</button>`:''}<button class="btn-sec" onclick="emails=emails.filter(x=>x.id!=='${e.id}');renderEmails()" style="padding:7px 10px;font-size:11px;">Remove</button></div></div></div>`;}).join('');
 }
 
-function toggleAuto() {
-  const btn = document.getElementById('auto-btn');
-  if (autoOn) { clearInterval(autoScanTimer); autoOn = false; btn.innerHTML = '▶ Auto-Scan'; emailLog('info','Auto-scan stopped.'); }
-  else {
-    const mins = parseInt(document.getElementById('scan-auto').value);
-    if (!mins) { showToast('Select an interval'); return; }
-    autoOn = true; btn.innerHTML = '■ Stop Auto';
-    scanInbox().then(processAllEmails);
-    autoScanTimer = setInterval(() => { scanInbox().then(processAllEmails); }, mins * 60000);
-    emailLog('success', `Auto-scan every ${mins} min.`);
-  }
-}
+function clearEmails(){emails=[];renderEmails();}
 
-function setEFilter(f, btn) { eFilter = f; document.querySelectorAll('#page-email .filter-pill').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderEmails(); }
+function emailLog(type,msg){const box=document.getElementById('email-log');const t=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});const colors={info:'#9ca3af',success:'#4ade80',warn:'#f4a935',error:'#f87171'};const div=document.createElement('div');div.innerHTML=`<span style="color:#4a5570;">[${t}]</span> <span style="color:${colors[type]||'#9ca3af'};">${msg}</span>`;box.appendChild(div);box.scrollTop=box.scrollHeight;}
 
-function renderEmails() {
-  const filtered = eFilter === 'all' ? emails : emails.filter(e => e.status === eFilter);
-  const c = document.getElementById('email-list');
-  if (!filtered.length) { c.innerHTML = `<div style="text-align:center;padding:24px;color:#4a5570;font-size:13px;">${eFilter==='all'?'No emails — scan inbox':'No '+eFilter+' emails'}</div>`; return; }
-  c.innerHTML = filtered.map(e => {
-    const bc = e.status==='done'?'eb-done':e.status==='failed'?'eb-fail':e.status==='processing'?'eb-proc':'eb-new';
-    const bl = e.status==='done'?'Done ✓':e.status==='failed'?'Failed ✗':e.status==='processing'?'Processing...':'New';
-    const atts = (e.attachments||[]).map(a=>`<span style="background:#1a2035;border:1px solid #374151;border-radius:6px;padding:3px 10px;font-size:11px;color:#d1d5db;">📄 ${a.name}</span>`).join('');
-    return `<div class="eitem ${e.status}">
-      <div class="ehead" onclick="document.getElementById('eb-${e.id}').classList.toggle('open')">
-        <span class="efrom">${e.from}</span>
-        <span style="font-size:11px;color:#6b7280;flex-shrink:0;">${e.date?.slice(0,16)||''}</span>
-        <span class="ebadge ${bc}">${bl}</span>
-      </div>
-      <div class="ebody" id="eb-${e.id}">
-        <div style="font-size:13px;font-weight:600;color:#e5e7eb;">${e.subject}</div>
-        <div style="font-size:12px;color:#9ca3af;line-height:1.5;">${(e.snippet||'').slice(0,200)}</div>
-        ${atts?`<div style="display:flex;flex-wrap:wrap;gap:6px;">${atts}</div>`:''}
-        <div style="display:flex;gap:8px;margin-top:4px;">
-          ${e.status!=='done'?`<button class="btn" onclick="processEmail('${e.id}')" style="padding:7px 14px;font-size:12px;">⚡ Extract Load</button>`:''}
-          <button class="btn-sec" onclick="emails=emails.filter(x=>x.id!=='${e.id}');renderEmails()" style="padding:7px 12px;font-size:12px;">Remove</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function clearEmails() { emails = []; renderEmails(); }
-
-function emailLog(type, msg) {
-  const box = document.getElementById('email-log');
-  const t = new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  const colors = {info:'#9ca3af',success:'#4ade80',warn:'#f4a935',error:'#f87171'};
-  const div = document.createElement('div');
-  div.innerHTML = `<span style="color:#4a5570;">[${t}]</span> <span style="color:${colors[type]||'#9ca3af'};">${msg}</span>`;
-  box.appendChild(div); box.scrollTop = box.scrollHeight;
-}
-
-// ===== RATE INTELLIGENCE =====
-function calcRate() {
-  const origin = document.getElementById('ri-origin').value;
-  const dest = document.getElementById('ri-dest').value;
-  const miles = parseFloat(document.getElementById('ri-miles').value) || 0;
-  const equip = document.getElementById('ri-equip').value;
-  const market = document.getElementById('ri-market').value;
-  const broker = document.getElementById('ri-broker').value;
-
-  if (!miles) { showToast('Enter estimated miles', 'err'); return; }
-
-  // Base rate calculation
-  const BASE_RPM = { 'normal': 2.85, 'tight': 3.20, 'soft': 2.55, 'holiday': 3.40 };
-  let baseRpm = BASE_RPM[market] || 2.85;
-  let baseRate = baseRpm * miles;
-
-  // Equipment adjustments
-  const EQUIP_ADJ = { '53 Dry Van': 0, 'Reefer': miles * 0.35, 'Vented Van': miles * 0.15, 'Flatbed': miles * 0.20, 'Step Deck': miles * 0.25 };
-  const equipAdj = EQUIP_ADJ[equip] || 0;
-
-  // Requirements adjustments
-  const reqs = [];
-  let reqAdj = 0;
-  if (document.getElementById('req-straps').checked) { reqs.push({label:'12 straps / securement',adj:150,type:'pos'}); reqAdj += 150; }
-  if (document.getElementById('req-hazmat').checked) { reqs.push({label:'Hazmat',adj:300,type:'pos'}); reqAdj += 300; }
-  if (document.getElementById('req-tarp').checked) { reqs.push({label:'Tarps required',adj:175,type:'pos'}); reqAdj += 175; }
-  if (document.getElementById('req-liftgate').checked) { reqs.push({label:'Liftgate',adj:125,type:'pos'}); reqAdj += 125; }
-  if (document.getElementById('req-sameday').checked) { reqs.push({label:'Same day / short notice',adj:250,type:'pos'}); reqAdj += 250; }
-
-  // Broker history adjustment
-  const BROKER_ADJ = { 'Arrive Logistics': 50, 'NTG': 25, 'Echo Logistics': 0, 'CH Robinson': -50, 'Coyote': -25 };
-  const brokerAdj = BROKER_ADJ[broker] || 0;
-  if (broker && brokerAdj !== 0) reqs.push({label:`${broker} history adjustment`,adj:brokerAdj,type:brokerAdj>0?'pos':'neg'});
-
-  const totalAdj = equipAdj + reqAdj + brokerAdj;
-  const offerRate = Math.round((baseRate + totalAdj) / 50) * 50;
-  const minRate = Math.max(miles * 2.50, Math.round((baseRate * 0.88 + totalAdj) / 50) * 50);
-  const offerRpm = offerRate / miles;
-  const minRpm = minRate / miles;
-
-  // Script
-  const script = `"We can cover this load from ${origin || '[origin]'} to ${dest || '[destination]'} for $${offerRate.toLocaleString()}. That's $${offerRpm.toFixed(2)}/mile — our minimum on this lane is $${minRate.toLocaleString()}."`;
-
-  // Breakdown
-  const breakdown = [
-    {label:`Base rate (${equip}, ${market} market)`,adj:Math.round(baseRate),type:'base'},
-    ...(equipAdj ? [{label:`${equip} premium`,adj:Math.round(equipAdj),type:'pos'}] : []),
-    ...reqs,
-  ];
-
-  document.getElementById('ri-offer').textContent = '$' + offerRate.toLocaleString();
-  document.getElementById('ri-offer-rpm').textContent = '$' + offerRpm.toFixed(2) + '/mi';
-  document.getElementById('ri-min').textContent = '$' + minRate.toLocaleString();
-  document.getElementById('ri-min-rpm').textContent = '$' + minRpm.toFixed(2) + '/mi';
-  document.getElementById('ri-script').textContent = script;
-  document.getElementById('ri-breakdown').innerHTML = breakdown.map(b =>
-    `<div class="rate-adj-item ${b.type}"><span>${b.label}</span><span>${b.adj >= 0 ? '+' : ''}$${Math.abs(b.adj).toLocaleString()}</span></div>`
-  ).join('');
+// ===== RATE INTEL =====
+function calcRate(){
+  const miles=parseFloat(document.getElementById('ri-miles').value)||0;if(!miles){showToast('Enter miles','err');return;}
+  const BASE={normal:2.85,tight:3.20,soft:2.55,holiday:3.40};const market=document.getElementById('ri-market').value;
+  let base=BASE[market]*miles;const equip=document.getElementById('ri-equip').value;
+  const EQUIP={Reefer:miles*.35,'Vented Van':miles*.15,Flatbed:miles*.20,'Step Deck':miles*.25};const ea=EQUIP[equip]||0;
+  let adj=ea;const reqs=[];
+  if(document.getElementById('req-straps').checked){adj+=150;reqs.push({l:'12 straps',a:150,t:'pos'});}
+  if(document.getElementById('req-hazmat').checked){adj+=300;reqs.push({l:'Hazmat',a:300,t:'pos'});}
+  if(document.getElementById('req-tarp').checked){adj+=175;reqs.push({l:'Tarps',a:175,t:'pos'});}
+  if(document.getElementById('req-liftgate').checked){adj+=125;reqs.push({l:'Liftgate',a:125,t:'pos'});}
+  if(document.getElementById('req-sameday').checked){adj+=250;reqs.push({l:'Same day',a:250,t:'pos'});}
+  if(document.getElementById('req-vented').checked){adj+=200;reqs.push({l:'Vented van',a:200,t:'pos'});}
+  const broker=document.getElementById('ri-broker').value;
+  const BADJ={'Arrive Logistics':50,'NTG':25,'Echo Logistics':0,'CH Robinson':-50,'Coyote':-25};
+  const ba=BADJ[broker]||0;if(broker&&ba)reqs.push({l:broker+' history',a:ba,t:ba>0?'pos':'neg'});adj+=ba;
+  const offer=Math.round((base+adj)/50)*50;const min=Math.max(miles*2.50,Math.round((base*.88+adj)/50)*50);
+  const origin=document.getElementById('ri-origin').value||'[origin]';const dest=document.getElementById('ri-dest').value||'[dest]';
+  document.getElementById('ri-offer').textContent='$'+offer.toLocaleString();
+  document.getElementById('ri-offer-rpm').textContent='$'+(offer/miles).toFixed(2)+'/mi';
+  document.getElementById('ri-min').textContent='$'+min.toLocaleString();
+  document.getElementById('ri-min-rpm').textContent='$'+(min/miles).toFixed(2)+'/mi';
+  document.getElementById('ri-script').textContent=`"We can cover ${origin} to ${dest} for $${offer.toLocaleString()}. That's $${(offer/miles).toFixed(2)}/mile — our minimum on this lane is $${min.toLocaleString()}."`;
+  const bd=[{l:`Base (${equip}, ${market})`,a:Math.round(base),t:'base'},...(ea?[{l:equip+' premium',a:Math.round(ea),t:'pos'}]:[]),...reqs];
+  document.getElementById('ri-breakdown').innerHTML=bd.map(b=>`<div class="rate-adj-item ${b.t}"><span>${b.l}</span><span>${b.a>=0?'+':''}$${Math.abs(b.a).toLocaleString()}</span></div>`).join('');
   document.getElementById('rate-result').classList.add('on');
+  logActivity('Calculated rate',`${origin} → ${dest} — Offer: $${offer.toLocaleString()}, Min: $${min.toLocaleString()}`);
 }
 
-function clearRateForm() {
-  ['ri-origin','ri-miles','ri-dest'].forEach(id => document.getElementById(id).value = '');
-  ['req-team','req-straps','req-hazmat','req-tarp','req-liftgate','req-sameday'].forEach(id => document.getElementById(id).checked = false);
-  document.getElementById('rate-result').classList.remove('on');
-}
+function clearRate(){['ri-origin','ri-dest','ri-miles'].forEach(id=>document.getElementById(id).value='');['req-straps','req-hazmat','req-tarp','req-liftgate','req-sameday','req-vented'].forEach(id=>document.getElementById(id).checked=false);document.getElementById('rate-result').classList.remove('on');}
 
 // ===== UTILS =====
-function showToast(msg, type) {
-  const t = document.createElement('div');
-  t.className = 'toast' + (type === 'err' ? ' err' : '');
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
-}
+function showToast(msg,type){const t=document.createElement('div');t.className='toast'+(type==='err'?' err':'');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),300);},2500);}
 
 // ===== INIT =====
-loads = DEMO_LOADS;
-renderFleet();
-renderGrossSheet();
-renderLoads();
+function initApp() {
+  loads = JSON.parse(JSON.stringify(DEMO_LOADS));
+  renderFleet();
+  renderLanes();
+  renderLoads();
+  renderGrossSheet();
+  renderActivityLog();
+  generateAIPicks();
+  refreshBrokerLoads();
+  // Navigate to first allowed tab
+  const allowed = ROLE_TABS[currentUser.role] || [];
+  const firstTab = allowed[0] || 'fleet';
+  const btn = document.getElementById('tnav-'+firstTab);
+  if (btn) { showPage(firstTab, btn); }
+}
 </script>
 </body>
 </html>
