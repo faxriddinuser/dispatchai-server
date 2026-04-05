@@ -504,7 +504,14 @@ select.inp option{background:#111827;}
     <div class="rate-form">
       <div><div class="lbl">Origin City</div><input class="inp" id="ri-origin" placeholder="e.g. Chicago, IL" style="width:100%;"></div>
       <div><div class="lbl">Destination City</div><input class="inp" id="ri-dest" placeholder="e.g. Atlanta, GA" style="width:100%;"></div>
-      <div><div class="lbl">Estimated Miles</div><input class="inp" id="ri-miles" placeholder="720" type="number" style="width:100%;"></div>
+      <div>
+        <div class="lbl">Miles <span style="color:#4ade80;font-size:9px;">— auto from Google Maps</span></div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input class="inp" id="ri-miles" placeholder="or enter manually" type="number" style="flex:1;">
+          <button class="btn-sec" id="ri-miles-btn" onclick="autoFillMiles()" style="padding:8px 12px;font-size:11px;white-space:nowrap;">📍 Get Miles</button>
+        </div>
+        <div id="ri-drive-time" style="font-size:11px;color:#4ade80;margin-top:4px;"></div>
+      </div>
       <div><div class="lbl">Equipment</div><select class="inp" id="ri-equip" style="width:100%;"><option>53 Dry Van</option><option>Reefer</option><option>Flatbed</option><option>Vented Van</option><option>Step Deck</option></select></div>
       <div>
         <div class="lbl">Load Requirements</div>
@@ -645,11 +652,21 @@ function doLogin() {
   err.textContent = '';
   currentUser = { username: u, ...USERS[u] };
   localStorage.setItem('dai_session', JSON.stringify({ username: u, ts: Date.now(), role: USERS[u].role }));
+  setCookie('dai_user', u, 1);
   startSession();
   logActivity('Signed in', '');
 }
 
 function startSession() {
+  // Save session in all 3 places for maximum reliability
+  try {
+    const u = currentUser.username;
+    localStorage.setItem('dai_session', JSON.stringify({ username: u, ts: Date.now(), role: currentUser.role }));
+    sessionStorage.setItem('dai_user', u);
+    setCookie('dai_user', u, 1);
+    // Also save to server
+    fetch('/session/save', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username: u, role: currentUser.role }) }).catch(()=>{});
+  } catch(e) {}
   document.getElementById('login-page').style.display = 'none';
   document.getElementById('main-app').style.display = 'block';
   document.getElementById('hdr-user').textContent = currentUser.name;
@@ -663,28 +680,67 @@ function startSession() {
 function doLogout() {
   logActivity('Signed out', '');
   currentUser = null;
-  localStorage.removeItem('dai_session');
+  try {
+    localStorage.removeItem('dai_session');
+    sessionStorage.removeItem('dai_user');
+    deleteCookie('dai_user');
+    if (currentUser) fetch('/session/clear/' + currentUser.username, { method:'POST' }).catch(()=>{});
+  } catch(e) {}
   document.getElementById('main-app').style.display = 'none';
   document.getElementById('login-page').style.display = 'block';
   document.getElementById('l-user').value = '';
   document.getElementById('l-pass').value = '';
 }
 
+function setCookie(name, val, days) {
+  const d = new Date();
+  d.setTime(d.getTime() + days*24*60*60*1000);
+  document.cookie = name + '=' + encodeURIComponent(val) + ';expires=' + d.toUTCString() + ';path=/';
+}
+
+function getCookie(name) {
+  const key = name + '=';
+  const parts = document.cookie.split(';');
+  for (let p of parts) {
+    p = p.trim();
+    if (p.indexOf(key) === 0) return decodeURIComponent(p.substring(key.length));
+  }
+  return null;
+}
+
+function deleteCookie(name) {
+  document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
+}
+
 function checkSavedSession() {
   try {
+    // 1. Try cookie first (most reliable)
+    const cookieUser = getCookie('dai_user');
+    if (cookieUser && USERS[cookieUser]) {
+      currentUser = { username: cookieUser, ...USERS[cookieUser] };
+      return true;
+    }
+    // 2. Try localStorage
     const saved = localStorage.getItem('dai_session');
-    if (!saved) return false;
-    const parsed = JSON.parse(saved);
-    const username = parsed.username;
-    const ts = parsed.ts;
-    if (!username || !ts) return false;
-    // Session expires after 24 hours
-    if (Date.now() - ts > 24 * 60 * 60 * 1000) { localStorage.removeItem('dai_session'); return false; }
-    if (!USERS[username]) return false;
-    currentUser = { username: username, ...USERS[username] };
-    return true;
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const username = parsed && parsed.username;
+      if (username && USERS[username]) {
+        currentUser = { username: username, ...USERS[username] };
+        setCookie('dai_user', username, 1);
+        return true;
+      }
+    }
+    // 3. Try sessionStorage (survives soft refreshes)
+    const sessUser = sessionStorage.getItem('dai_user');
+    if (sessUser && USERS[sessUser]) {
+      currentUser = { username: sessUser, ...USERS[sessUser] };
+      setCookie('dai_user', sessUser, 1);
+      localStorage.setItem('dai_session', JSON.stringify({ username: sessUser, ts: Date.now() }));
+      return true;
+    }
+    return false;
   } catch(e) {
-    localStorage.removeItem('dai_session');
     return false;
   }
 }
@@ -1169,30 +1225,55 @@ function generateAIPicks() {
   }, 1200);
 }
 
-function refreshBrokerLoads() {
+async function refreshBrokerLoads() {
   const c = document.getElementById('broker-loads');
   c.innerHTML = '<div style="text-align:center;padding:14px;color:#9ca3af;"><span class="spinner"></span>Fetching available loads...</div>';
   setTimeout(() => {
-    c.innerHTML = BROKER_AVAILABLE.map(l => `
+    // Enrich with real miles from Google Maps
+    const enriched = await Promise.all(BROKER_AVAILABLE.map(async l => {
+      const parts = l.route.split('→');
+      if (parts.length === 2) {
+        const result = await getMiles(parts[0].trim(), parts[1].trim());
+        if (result) {
+          l.miles = result.miles;
+          l.driveTime = result.driveTime;
+          l.rpm = parseFloat((l.rate / result.miles).toFixed(2));
+        }
+      }
+      return l;
+    }));
+    c.innerHTML = enriched.map(l => `
       <div class="ai-load-item" style="margin-bottom:8px;">
         <div style="width:80px;flex-shrink:0;"><span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${l.broker==='Arrive Logistics'?'#3d2900':l.broker==='NTG'?'#0a1a2e':'#0f2d1a'};color:${l.broker==='Arrive Logistics'?'#f4a935':l.broker==='NTG'?'#60a5fa':'#4ade80'};">${l.broker==='Arrive Logistics'?'ARRIVE':l.broker==='NTG'?'NTG':'ECHO'}</span></div>
-        <div class="ai-load-route" style="flex:1;">${l.route}<br><span style="font-size:11px;color:#9ca3af;">${l.equip} · ${l.miles.toLocaleString()} mi · PU: ${l.pickup}${l.requirements?` · <span style="color:#f4a935;">${l.requirements}</span>`:''}</span></div>
-        <div style="text-align:right;flex-shrink:0;"><div class="ai-load-rate">$${l.rate.toLocaleString()}</div><div class="ai-load-rpm" style="color:${l.rpm>=2.5?'#4ade80':'#f87171'};">$${l.rpm.toFixed(2)}/mi</div></div>
+        <div class="ai-load-route" style="flex:1;">${l.route}<br><span style="font-size:11px;color:#9ca3af;">${l.equip} · <strong style="color:#e5e7eb;">${l.miles.toLocaleString()} mi</strong>${l.driveTime?' · 🕐 '+l.driveTime:''} · PU: ${l.pickup}${l.requirements?' · <span style="color:#f4a935;">'+l.requirements+'</span>':''}</span></div>
+        <div style="text-align:right;flex-shrink:0;margin-right:8px;"><div class="ai-load-rate">$${l.rate.toLocaleString()}</div><div class="ai-load-rpm" style="color:${l.rpm>=2.5?'#4ade80':'#f87171'};">$${l.rpm.toFixed(2)}/mi</div></div>
         <button class="btn" onclick="bookBrokerLoad('${l.id}')" style="font-size:11px;padding:6px 12px;">Book</button>
       </div>`).join('');
   }, 800);
 }
 
-function bookBrokerLoad(id) {
+async function bookBrokerLoad(id) {
   const load = BROKER_AVAILABLE.find(l=>l.id===id);
   if (!load) return;
-  const newLoad = {id:'ld_'+Date.now(),loadNumber:'BKD-'+Date.now().toString().slice(-6),broker:load.broker,commodity:'Freight',equipment:load.equip,rate:load.rate,loadedMiles:load.miles,totalMiles:load.miles+50,status:'unassigned',assignedDriver:null,source:'broker portal',emailNotes:`Route: ${load.route}\nPickup: ${load.pickup}\nMiles: ${load.miles}\nRequirements: ${load.requirements||'None'}`,stops:[{stopNumber:1,type:'PU',company:'Shipper',address:'',city:load.route.split('→')[0].trim().split(',')[0],state:load.route.split('→')[0].trim().split(',')[1]?.trim()||'',zip:'',date:load.pickup.split(',')[0],timeWindow:load.pickup.split(',')[1]?.trim()||'TBD',reference:null,instructions:load.requirements||null},{stopNumber:2,type:'DEL',company:'Consignee',address:'',city:load.route.split('→')[1].trim().split(',')[0],state:load.route.split('→')[1].trim().split(',')[1]?.trim()||'',zip:'',date:'TBD',timeWindow:'TBD',reference:null,instructions:null}],specialInstructions:load.requirements||null};
+  const origin = load.route.split('→')[0].trim();
+  const dest = load.route.split('→')[1].trim();
+  const newLoad = {id:'ld_'+Date.now(),loadNumber:'BKD-'+Date.now().toString().slice(-6),broker:load.broker,commodity:'Freight',equipment:load.equip,rate:load.rate,loadedMiles:load.miles,totalMiles:load.miles,driveTime:'',status:'unassigned',assignedDriver:null,source:'broker portal',emailNotes:`Route: ${load.route}\nPickup: ${load.pickup}\nMiles: ${load.miles}\nRequirements: ${load.requirements||'None'}`,stops:[{stopNumber:1,type:'PU',company:'Shipper',address:'',city:origin.split(',')[0],state:origin.split(',')[1]?.trim()||'',zip:'',date:load.pickup.split(',')[0],timeWindow:load.pickup.split(',')[1]?.trim()||'TBD',reference:null,instructions:load.requirements||null},{stopNumber:2,type:'DEL',company:'Consignee',address:'',city:dest.split(',')[0],state:dest.split(',')[1]?.trim()||'',zip:'',date:'TBD',timeWindow:'TBD',reference:null,instructions:null}],specialInstructions:load.requirements||null};
   loads.unshift(newLoad);
   logActivity('Booked load from broker board',`${load.broker} — ${load.route} — $${load.rate.toLocaleString()}`);
   renderLoads();
   showPage('loads', document.getElementById('tnav-loads'));
   document.getElementById('tnav-loads').click();
-  showToast('Load booked! Check Load Board.');
+  showToast('Load booked! Calculating real miles...');
+  // Get real miles from Google Maps
+  getMiles(origin, dest).then(result => {
+    if (result) {
+      newLoad.loadedMiles = result.miles;
+      newLoad.totalMiles = result.miles;
+      newLoad.driveTime = result.driveTime;
+      showToast(`Real miles: ${result.miles} mi · ${result.driveTime}`);
+      renderLoads();
+    }
+  });
 }
 
 // ===== MESSAGE MODAL =====
@@ -1258,7 +1339,26 @@ async function processEmail(id){
       const ed=await er.json();
       if(ed.error)throw new Error(ed.error);
       const ld=ed.load;
-      if(ld&&(ld.loadNumber||ld.stops?.length)){loads.unshift({...ld,id:'ld_'+Date.now()+'_'+Math.random().toString(36).slice(2),status:'unassigned',assignedDriver:null,source:email.from,emailNotes:`From: ${email.from}\nSubject: ${email.subject}\nDate: ${email.date}\n\n${email.snippet}`,createdAt:new Date().toISOString()});created++;emailLog('success',`Load extracted from ${att.name}`);logActivity('Extracted load from email',`${email.subject}`);}
+      if(ld&&(ld.loadNumber||ld.stops?.length)){
+        const newLoad = {...ld,id:'ld_'+Date.now()+'_'+Math.random().toString(36).slice(2),status:'unassigned',assignedDriver:null,source:email.from,emailNotes:`From: ${email.from}\nSubject: ${email.subject}\nDate: ${email.date}\n\n${email.snippet}`,createdAt:new Date().toISOString()};
+        loads.unshift(newLoad);
+        created++;
+        emailLog('success',`Load extracted from ${att.name}`);
+        logActivity('Extracted load from email',`${email.subject}`);
+        // Auto-calculate real miles from Google Maps
+        if (newLoad.stops && newLoad.stops.length >= 2) {
+          const stopAddresses = newLoad.stops.map(s => `${s.address}, ${s.city}, ${s.state} ${s.zip}`);
+          getMilesRoute(stopAddresses).then(result => {
+            if (result && result.totalMiles) {
+              newLoad.loadedMiles = result.totalMiles;
+              newLoad.totalMiles = result.totalMiles;
+              newLoad.driveTime = result.driveTime;
+              emailLog('success', `Real miles calculated: ${result.totalMiles} mi (${result.driveTime})`);
+              renderLoads();
+            }
+          });
+        }
+      }
     }catch(e){emailLog('error','Attachment failed: '+e.message);}}email.status=created>0?'done':'skipped';if(created)renderLoads();}catch(e){email.status='failed';emailLog('error','Failed: '+e.message);}
   renderEmails();
 }
@@ -1280,6 +1380,58 @@ function clearEmails(){emails=[];renderEmails();}
 function emailLog(type,msg){const box=document.getElementById('email-log');const t=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});const colors={info:'#9ca3af',success:'#4ade80',warn:'#f4a935',error:'#f87171'};const div=document.createElement('div');div.innerHTML=`<span style="color:#4a5570;">[${t}]</span> <span style="color:${colors[type]||'#9ca3af'};">${msg}</span>`;box.appendChild(div);box.scrollTop=box.scrollHeight;}
 
 // ===== RATE INTEL =====
+async function getMiles(origin, destination) {
+  try {
+    const r = await fetch('/miles', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ origin, destination })
+    });
+    const data = await r.json();
+    if (data.error) throw new Error(data.error);
+    return data;
+  } catch(e) {
+    console.error('getMiles failed:', e.message);
+    return null;
+  }
+}
+
+async function getMilesRoute(stops) {
+  try {
+    const r = await fetch('/miles/route', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stops })
+    });
+    const data = await r.json();
+    if (data.error) throw new Error(data.error);
+    return data;
+  } catch(e) {
+    return null;
+  }
+}
+
+async function autoFillMiles() {
+  const origin = document.getElementById('ri-origin').value.trim();
+  const dest = document.getElementById('ri-dest').value.trim();
+  const milesEl = document.getElementById('ri-miles');
+  const milesBtnEl = document.getElementById('ri-miles-btn');
+  if (!origin || !dest) { showToast('Enter origin and destination first', 'err'); return; }
+  if (milesBtnEl) { milesBtnEl.disabled = true; milesBtnEl.innerHTML = '<span class="spinner"></span>'; }
+  const result = await getMiles(origin, dest);
+  if (result) {
+    milesEl.value = result.miles;
+    showToast(`${result.miles} mi · ${result.driveTime} drive time`);
+    milesEl.style.borderColor = '#4ade80';
+    // Show drive time
+    const dtEl = document.getElementById('ri-drive-time');
+    if (dtEl) dtEl.textContent = '🕐 Drive time: ' + result.driveTime;
+  } else {
+    showToast('Could not calculate miles — check city names', 'err');
+  }
+  if (milesBtnEl) { milesBtnEl.disabled = false; milesBtnEl.innerHTML = '📍 Get Miles'; }
+}
+
 function calcRate(){
   const miles=parseFloat(document.getElementById('ri-miles').value)||0;if(!miles){showToast('Enter miles','err');return;}
   const BASE={normal:2.85,tight:3.20,soft:2.55,holiday:3.40};const market=document.getElementById('ri-market').value;
@@ -1331,11 +1483,15 @@ function initApp() {
 
 // Run session check immediately — DOM is ready since script is at bottom of body
 (function() {
-  if (checkSavedSession()) {
-    startSession();
-  } else {
-    document.getElementById('login-page').style.display = 'flex';
+  try {
+    if (checkSavedSession()) {
+      startSession();
+      return;
+    }
+  } catch(e) {
+    console.error('Session check failed:', e);
   }
+  document.getElementById('login-page').style.display = 'flex';
 })();
 </script>
 </body>
