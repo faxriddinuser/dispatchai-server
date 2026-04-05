@@ -1513,18 +1513,40 @@ async function autoFillMiles() {
   const dest = document.getElementById('ri-dest').value.trim();
   const milesEl = document.getElementById('ri-miles');
   const milesBtnEl = document.getElementById('ri-miles-btn');
+  const dtEl = document.getElementById('ri-drive-time');
   if (!origin || !dest) { showToast('Enter origin and destination first', 'err'); return; }
-  if (milesBtnEl) { milesBtnEl.disabled = true; milesBtnEl.innerHTML = '<span class="spinner"></span>'; }
+  if (milesBtnEl) { milesBtnEl.disabled = true; milesBtnEl.innerHTML = '<span class="spinner"></span>Calculating...'; }
+  if (dtEl) dtEl.textContent = '';
+
+  // Try Google Maps first
   const result = await getMiles(origin, dest);
-  if (result) {
+  if (result && result.miles) {
     milesEl.value = result.miles;
-    showToast(`${result.miles} mi · ${result.driveTime} drive time`);
     milesEl.style.borderColor = '#4ade80';
-    // Show drive time
-    const dtEl = document.getElementById('ri-drive-time');
-    if (dtEl) dtEl.textContent = '🕐 Drive time: ' + result.driveTime;
+    if (dtEl) dtEl.textContent = '🕐 ' + result.driveTime + (result.resolvedOrigin ? ' · Resolved: ' + result.resolvedOrigin + ' → ' + result.resolvedDest : '');
+    showToast(result.miles + ' mi · ' + result.driveTime);
   } else {
-    showToast('Could not calculate miles — check city names', 'err');
+    // Fallback: check historical data for this lane
+    const laneData = getHistoricalLaneData(origin, dest);
+    if (laneData && laneData.entries > 0) {
+      // Use avg miles from history — get from laneSummary
+      const oState = origin.split(',').pop().trim().slice(0,2).toUpperCase();
+      const dState = dest.split(',').pop().trim().slice(0,2).toUpperCase();
+      const key = oState + '|' + dState;
+      const laneSummary = HIST && HIST.laneSummary && HIST.laneSummary[key];
+      if (laneSummary && laneSummary.avgMiles) {
+        milesEl.value = Math.round(laneSummary.avgMiles);
+        milesEl.style.borderColor = '#f4a935';
+        if (dtEl) dtEl.textContent = '📊 Estimated from your ' + laneData.entries + ' historical loads on this lane (avg ' + Math.round(laneSummary.avgMiles) + ' mi)';
+        showToast('Using historical avg: ~' + Math.round(laneSummary.avgMiles) + ' mi');
+      } else {
+        if (dtEl) dtEl.textContent = '⚠ Google Maps not available — enable Distance Matrix API in Google Cloud Console';
+        showToast('Maps API not configured — enter miles manually', 'err');
+      }
+    } else {
+      if (dtEl) dtEl.textContent = '⚠ Google Maps API not available — enable Distance Matrix API in Google Cloud Console';
+      showToast('Maps API not configured — enter miles manually', 'err');
+    }
   }
   if (milesBtnEl) { milesBtnEl.disabled = false; milesBtnEl.innerHTML = '📍 Get Miles'; }
 }
@@ -1555,6 +1577,71 @@ function calcRate(){
   document.getElementById('ri-breakdown').innerHTML=bd.map(b=>`<div class="rate-adj-item ${b.t}"><span>${b.l}</span><span>${b.a>=0?'+':''}$${Math.abs(b.a).toLocaleString()}</span></div>`).join('');
   document.getElementById('rate-result').classList.add('on');
   logActivity('Calculated rate',`${origin} → ${dest} — Offer: $${offer.toLocaleString()}, Min: $${min.toLocaleString()}`);
+
+  // Show historical data from your own load history
+  setTimeout(() => { showHistoricalRateData(origin, dest, broker); }, 50);
+}
+
+function showHistoricalRateData(origin, dest, broker) {
+  const laneData = getHistoricalLaneData(origin, dest);
+  const brokerData = getHistoricalBrokerData(broker);
+  let histHtml = '';
+  if (laneData) {
+    const level = laneData.level === 'city'
+      ? (origin.split(',')[0] + ' to ' + dest.split(',')[0])
+      : (origin.split(',').pop().trim() + ' to ' + dest.split(',').pop().trim() + ' state avg');
+    const h = document.createElement('div');
+    h.style.cssText = 'background:#0a1a2e;border:1px solid #1e3a5f;border-radius:8px;padding:12px 14px;margin-top:10px;';
+    h.innerHTML = [
+      '<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#60a5fa;text-transform:uppercase;margin-bottom:8px;">',
+      '📊 Your History — ' + level + ' (' + laneData.entries + ' loads)</div>',
+      '<div style="display:flex;gap:20px;flex-wrap:wrap;">',
+      '<div><div style="font-size:10px;color:#6b7490;">Avg Paid</div>',
+      '<div style="font-size:18px;font-weight:700;color:#f4a935;">$' + laneData.avgRpm + '/mi</div></div>',
+      '<div><div style="font-size:10px;color:#6b7490;">Best</div>',
+      '<div style="font-size:18px;font-weight:700;color:#4ade80;">$' + laneData.maxRpm + '/mi</div></div>',
+      '<div><div style="font-size:10px;color:#6b7490;">Worst</div>',
+      '<div style="font-size:18px;font-weight:700;color:#f87171;">$' + laneData.minRpm + '/mi</div></div>',
+      '</div>'
+    ].join('');
+    histHtml += h.outerHTML;
+  }
+  if (brokerData) {
+    const rpmCol = brokerData.avgRpm >= 2.5 ? '#4ade80' : '#f87171';
+    const h = document.createElement('div');
+    h.style.cssText = 'background:#0f2d1a;border:1px solid #166534;border-radius:8px;padding:12px 14px;margin-top:8px;';
+    h.innerHTML = [
+      '<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#4ade80;text-transform:uppercase;margin-bottom:8px;">',
+      '🤝 ' + (broker || 'Broker') + ' — ' + brokerData.count + ' loads in your history</div>',
+      '<div style="display:flex;gap:20px;flex-wrap:wrap;">',
+      '<div><div style="font-size:10px;color:#6b7490;">Avg RPM</div>',
+      '<div style="font-size:18px;font-weight:700;color:' + rpmCol + ';">$' + brokerData.avgRpm.toFixed(2) + '/mi</div></div>',
+      '<div><div style="font-size:10px;color:#6b7490;">Best RPM</div>',
+      '<div style="font-size:18px;font-weight:700;color:#4ade80;">$' + brokerData.maxRpm.toFixed(2) + '/mi</div></div>',
+      '<div><div style="font-size:10px;color:#6b7490;">Total Revenue</div>',
+      '<div style="font-size:18px;font-weight:700;color:#f4a935;">$' + brokerData.totalPay.toLocaleString() + '</div></div>',
+      '</div>'
+    ].join('');
+    histHtml += h.outerHTML;
+  }
+  if (histHtml) {
+    let histDiv = document.getElementById('ri-hist');
+    if (!histDiv) {
+      histDiv = document.createElement('div');
+      histDiv.id = 'ri-hist';
+      document.getElementById('rate-result').appendChild(histDiv);
+    }
+    const wrapper = document.createElement('div');
+    wrapper.style.marginTop = '14px';
+    const lbl = document.createElement('div');
+    lbl.className = 'lbl';
+    lbl.style.marginBottom = '8px';
+    lbl.textContent = '📂 Your Historical Data on This Lane';
+    wrapper.appendChild(lbl);
+    wrapper.innerHTML += histHtml;
+    histDiv.innerHTML = '';
+    histDiv.appendChild(wrapper);
+  }
 }
 
 function clearRate(){['ri-origin','ri-dest','ri-miles'].forEach(id=>document.getElementById(id).value='');['req-straps','req-hazmat','req-tarp','req-liftgate','req-sameday','req-vented'].forEach(id=>document.getElementById(id).checked=false);document.getElementById('rate-result').classList.remove('on');}
@@ -1768,46 +1855,7 @@ function exportMileageReport() {
 }
 
 // ===== ENHANCED RATE INTEL WITH HISTORY =====
-const origCalcRate = calcRate;
-function calcRate() {
-  origCalcRate();
-  // Show historical data after calculating
-  const origin = document.getElementById('ri-origin').value;
-  const dest = document.getElementById('ri-dest').value;
-  const broker = document.getElementById('ri-broker').value;
-
-  const laneData = getHistoricalLaneData(origin, dest);
-  const brokerData = getHistoricalBrokerData(broker);
-
-  let histHtml = '';
-  if (laneData) {
-    const level = laneData.level === 'city' ? `${origin.split(',')[0]} → ${dest.split(',')[0]}` : `${origin.split(',').pop().trim()} → ${dest.split(',').pop().trim()} (state avg)`;
-    histHtml += `<div style="background:#0a1a2e;border:1px solid #1e3a5f;border-radius:8px;padding:12px 14px;margin-top:10px;">
-      <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#60a5fa;text-transform:uppercase;margin-bottom:8px;">📊 Your History — ${level} (${laneData.entries} loads)</div>
-      <div style="display:flex;gap:20px;flex-wrap:wrap;">
-        <div><div style="font-size:10px;color:#6b7490;">Avg Paid</div><div style="font-size:18px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:#f4a935;">$${laneData.avgRpm}/mi</div></div>
-        <div><div style="font-size:10px;color:#6b7490;">Best</div><div style="font-size:18px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:#4ade80;">$${laneData.maxRpm}/mi</div></div>
-        <div><div style="font-size:10px;color:#6b7490;">Worst</div><div style="font-size:18px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:#f87171;">$${laneData.minRpm}/mi</div></div>
-      </div>
-    </div>`;
-  }
-  if (brokerData) {
-    histHtml += `<div style="background:#0f2d1a;border:1px solid #166534;border-radius:8px;padding:12px 14px;margin-top:8px;">
-      <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#4ade80;text-transform:uppercase;margin-bottom:8px;">🤝 ${broker || 'Broker'} History (${brokerData.count} loads with you)</div>
-      <div style="display:flex;gap:20px;flex-wrap:wrap;">
-        <div><div style="font-size:10px;color:#6b7490;">Avg RPM</div><div style="font-size:18px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:${brokerData.avgRpm>=2.5?'#4ade80':'#f87171'};">$${brokerData.avgRpm.toFixed(2)}/mi</div></div>
-        <div><div style="font-size:10px;color:#6b7490;">Best RPM</div><div style="font-size:18px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:#4ade80;">$${brokerData.maxRpm.toFixed(2)}/mi</div></div>
-        <div><div style="font-size:10px;color:#6b7490;">Total Revenue</div><div style="font-size:18px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:#f4a935;">$${brokerData.totalPay.toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>
-      </div>
-    </div>`;
-  }
-  if (histHtml) {
-    const result = document.getElementById('rate-result');
-    let histDiv = document.getElementById('ri-hist');
-    if (!histDiv) { histDiv = document.createElement('div'); histDiv.id = 'ri-hist'; result.appendChild(histDiv); }
-    histDiv.innerHTML = `<div style="margin-top:14px;"><div class="lbl">Your Historical Data</div>${histHtml}</div>`;
-  }
-}
+// Historical rate display integrated into calcRate below
 
 // ===== LOAD HISTORY INTO LOAD BOARD =====
 function loadHistoryIntoLoadBoard() {
