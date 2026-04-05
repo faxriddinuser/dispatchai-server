@@ -270,6 +270,8 @@ select.inp option{background:#111827;}
     <button class="nb" onclick="showPage('gross',this)" id="tnav-gross">📊 Gross Sheet</button>
     <button class="nb" onclick="showPage('email',this)" id="tnav-email">📧 Email</button>
     <button class="nb" onclick="showPage('rate',this)" id="tnav-rate">💰 Rate Intel</button>
+    <button class="nb" onclick="showPage('broker',this)" id="tnav-broker">📈 Broker Report</button>
+    <button class="nb" onclick="showPage('mileage',this)" id="tnav-mileage">🛣️ Driver Mileage</button>
     <button class="nb" onclick="showPage('activity',this)" id="tnav-activity">📝 Activity Log</button>
   </div>
   <button class="logout-btn" onclick="doLogout()">Sign Out</button>
@@ -574,6 +576,100 @@ select.inp option{background:#111827;}
   </div>
 </div>
 
+<!-- BROKER PERFORMANCE REPORT -->
+<div id="page-broker" class="page">
+  <div class="stats-row s4" id="broker-stats-row">
+    <div class="stat-card"><div class="stat-val" id="br-total-pay">$2.74M</div><div class="stat-lbl">Total Revenue (2 weeks)</div></div>
+    <div class="stat-card"><div class="stat-val" id="br-total-miles">1.33M</div><div class="stat-lbl">Total Miles</div></div>
+    <div class="stat-card"><div class="stat-val" id="br-avg-rpm" style="color:#f4a935;">$2.05</div><div class="stat-lbl">Fleet Avg RPM</div></div>
+    <div class="stat-card"><div class="stat-val" id="br-total-loads">1,091</div><div class="stat-lbl">Total Loads</div></div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">📈 Broker Performance Report
+      <span style="font-size:11px;color:#6b7490;font-weight:400;text-transform:none;">Based on 1,091 loads over 2 weeks — sorted by avg RPM</span>
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        <button class="fpill active" onclick="setBrokerSort('rpm',this)">By RPM</button>
+        <button class="fpill" onclick="setBrokerSort('count',this)">By Volume</button>
+        <button class="fpill" onclick="setBrokerSort('pay',this)">By Revenue</button>
+        <button class="btn-sec" onclick="exportBrokerReport()" style="font-size:11px;padding:5px 12px;">📥 Export CSV</button>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="ftbl" id="broker-tbl">
+        <thead><tr>
+          <th>Broker</th>
+          <th style="width:80px;text-align:center;">Loads</th>
+          <th style="width:110px;text-align:right;">Total Revenue</th>
+          <th style="width:110px;text-align:right;">Total Miles</th>
+          <th style="width:90px;text-align:center;">Avg RPM</th>
+          <th style="width:80px;text-align:center;">Best RPM</th>
+          <th style="width:80px;text-align:center;">Worst RPM</th>
+          <th style="width:100px;text-align:center;">Rating</th>
+        </tr></thead>
+        <tbody id="broker-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">🗺️ Top Lanes by State</div>
+    <div class="tbl-wrap">
+      <table class="ftbl" id="lane-tbl">
+        <thead><tr>
+          <th>Lane</th>
+          <th style="width:80px;text-align:center;">Loads</th>
+          <th style="width:100px;text-align:right;">Avg Pay</th>
+          <th style="width:100px;text-align:right;">Avg Miles</th>
+          <th style="width:90px;text-align:center;">Avg RPM</th>
+          <th style="width:80px;text-align:center;">Best RPM</th>
+          <th style="width:120px;text-align:center;">Recommendation</th>
+        </tr></thead>
+        <tbody id="lane-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- DRIVER MILEAGE -->
+<div id="page-mileage" class="page">
+  <div class="stats-row s4" id="mileage-stats-row">
+    <div class="stat-card"><div class="stat-val" id="mi-total-drivers">156</div><div class="stat-lbl">Total Drivers</div></div>
+    <div class="stat-card"><div class="stat-val" id="mi-total-miles">1.33M</div><div class="stat-lbl">Total Fleet Miles</div></div>
+    <div class="stat-card"><div class="stat-val" id="mi-avg-miles" style="color:#f4a935;">8,558</div><div class="stat-lbl">Avg Miles / Driver</div></div>
+    <div class="stat-card"><div class="stat-val" id="mi-total-pay">$2.74M</div><div class="stat-lbl">Total Fleet Pay</div></div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">🛣️ Driver Mileage & Pay Report
+      <span style="font-size:11px;color:#6b7490;font-weight:400;text-transform:none;">2-week period · For payroll calculations</span>
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        <input class="inp" id="mi-search" placeholder="Search driver..." style="width:180px;font-size:12px;" oninput="renderMileage()">
+        <button class="fpill active" onclick="setMiSort('miles',this)">By Miles</button>
+        <button class="fpill" onclick="setMiSort('pay',this)">By Pay</button>
+        <button class="fpill" onclick="setMiSort('loads',this)">By Loads</button>
+        <button class="btn-sec" onclick="exportMileageReport()" style="font-size:11px;padding:5px 12px;">📥 Export CSV</button>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="ftbl">
+        <thead><tr>
+          <th style="width:40px;">#</th>
+          <th>Driver Name</th>
+          <th style="width:80px;text-align:center;">Loads</th>
+          <th style="width:110px;text-align:right;">Total Miles</th>
+          <th style="width:110px;text-align:right;">Load Pay</th>
+          <th style="width:90px;text-align:center;">Avg RPM</th>
+          <th style="width:130px;text-align:right;">Est. Driver Pay (70CPM)</th>
+          <th style="width:130px;text-align:right;">Est. Driver Pay (65CPM)</th>
+          <th style="width:130px;text-align:right;">Est. Driver Pay (63CPM)</th>
+        </tr></thead>
+        <tbody id="mileage-tbody"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:#6b7490;padding:0 4px;">
+      ⚠ Driver pay estimates are based on CPM rates. OO drivers (owner-operators) receive percentage-based pay — verify their rate agreements separately. Rate is not shown to CPM drivers.
+    </div>
+  </div>
+</div>
+
 </div><!-- end content -->
 </div><!-- end main-app -->
 
@@ -610,11 +706,11 @@ const USERS = {
 };
 
 const ROLE_TABS = {
-  Manager: ['fleet','lanes','loads','ai','gross','email','rate','activity'],
-  Dispatcher: ['fleet','lanes','loads','ai','gross','email','rate'],
+  Manager: ['fleet','lanes','loads','ai','gross','email','rate','broker','mileage','activity'],
+  Dispatcher: ['fleet','lanes','loads','ai','gross','email','rate','broker'],
   Fleet: ['fleet','lanes','gross'],
   Update: ['fleet','lanes','loads','gross'],
-  Accounting: ['gross'],
+  Accounting: ['gross','mileage','broker'],
 };
 
 const ROLE_CAN_EDIT = {
@@ -934,23 +1030,21 @@ function updateFleetField(truck, field, value) {
 }
 
 function exportActivityLog() {
+  if (!HIST) return;
   if (!activityLog.length) { showToast('No activity to export', 'err'); return; }
   const rows = [['Timestamp','User','Role','Truck #','Driver','Field','Old Value','New Value','Action','Detail']];
   activityLog.forEach(e => {
-    rows.push([
-      e.ts.toLocaleString(),
-      e.user, e.role,
-      e.truck||'', e.driver||'',
-      e.field||'', e.oldVal||'', e.newVal||'',
-      e.action||'', e.detail||''
-    ]);
+    rows.push([e.ts ? e.ts.toLocaleString() : '', e.user||'', e.role||'',
+      e.truck||'', e.driver||'', e.field||'', e.oldVal||'', e.newVal||'', e.action||'', e.detail||'']);
   });
-  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const nl = String.fromCharCode(10);
+  const q = '"';
+  const csv = rows.map(r => r.map(v => q + String(v).replace(new RegExp(q,'g'), q+q) + q).join(',')).join(nl);
   const a = document.createElement('a');
   a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = 'dispatchai-activity-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.download = 'dispatchai-activity.csv';
   a.click();
-  showToast('Activity log exported!');
+  showToast('Exported!');
 }
 
 function logFleetChange(truck, driver, field, oldVal, newVal) {
@@ -1482,6 +1576,270 @@ function initApp() {
   const firstTab = allowed[0] || 'fleet';
   const btn = document.getElementById('tnav-'+firstTab);
   if (btn) { showPage(firstTab, btn); btn.classList.add('active'); }
+  // Load historical data in background
+  loadHistoricalData().then(() => {
+    renderBrokerReport();
+    renderMileage();
+    loadHistoryIntoLoadBoard();
+  });
+}
+
+// ===== HISTORICAL DATA =====
+let HIST = null;
+
+async function loadHistoricalData() {
+  try {
+    const r = await fetch('/historical_data.json');
+    HIST = await r.json();
+    console.log('Historical data loaded:', HIST.meta);
+  } catch(e) { console.error('Failed to load historical data:', e); }
+}
+
+// ===== RATE INTEL — ENHANCED WITH HISTORICAL DATA =====
+function getHistoricalLaneData(origin, destination) {
+  if (!HIST) return null;
+  const oState = origin.trim().split(',').pop().trim().slice(0,2).toUpperCase();
+  const dState = destination.trim().split(',').pop().trim().slice(0,2).toUpperCase();
+  const oCity = origin.trim().split(',')[0].trim().toUpperCase();
+  const dCity = destination.trim().split(',')[0].trim().toUpperCase();
+
+  // Try city-to-city first
+  const cityKey = `${oCity}|${dCity}`;
+  if (HIST.cityLaneHistory[cityKey] && HIST.cityLaneHistory[cityKey].length > 0) {
+    const entries = HIST.cityLaneHistory[cityKey];
+    const rpms = entries.map(e => e.rpm).filter(r => r > 0);
+    return { level: 'city', entries: entries.length, avgRpm: rpms.length ? (rpms.reduce((a,b)=>a+b,0)/rpms.length).toFixed(2) : null, maxRpm: rpms.length ? Math.max(...rpms).toFixed(2) : null, minRpm: rpms.length ? Math.min(...rpms).toFixed(2) : null };
+  }
+
+  // Fall back to state-to-state
+  const stateKey = `${oState}|${dState}`;
+  if (HIST.laneSummary[stateKey]) {
+    const s = HIST.laneSummary[stateKey];
+    return { level: 'state', entries: s.count, avgRpm: s.avgRpm.toFixed(2), maxRpm: s.maxRpm.toFixed(2), minRpm: s.minRpm.toFixed(2) };
+  }
+  return null;
+}
+
+function getHistoricalBrokerData(broker) {
+  if (!HIST || !broker) return null;
+  // Try exact match then partial
+  let data = HIST.brokerPerformance[broker];
+  if (!data) {
+    const brokerUp = broker.toUpperCase();
+    const key = Object.keys(HIST.brokerPerformance).find(k => k.toUpperCase().includes(brokerUp) || brokerUp.includes(k.toUpperCase()));
+    if (key) data = HIST.brokerPerformance[key];
+  }
+  return data || null;
+}
+
+// ===== BROKER REPORT =====
+let brokerSort = 'rpm';
+
+function setBrokerSort(s, btn) {
+  brokerSort = s;
+  document.querySelectorAll('#page-broker .fpill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBrokerReport();
+}
+
+function renderBrokerReport() {
+  if (!HIST) { document.getElementById('broker-tbody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#6b7490;">Loading historical data...</td></tr>'; return; }
+
+  const brokers = Object.entries(HIST.brokerPerformance).filter(([,v]) => v.count >= 2);
+  brokers.sort((a,b) => {
+    if (brokerSort === 'rpm') return b[1].avgRpm - a[1].avgRpm;
+    if (brokerSort === 'count') return b[1].count - a[1].count;
+    if (brokerSort === 'pay') return b[1].totalPay - a[1].totalPay;
+    return 0;
+  });
+
+  document.getElementById('broker-tbody').innerHTML = brokers.map(([name, s], i) => {
+    const rpmColor = s.avgRpm >= 2.5 ? '#4ade80' : s.avgRpm >= 2.0 ? '#f4a935' : '#f87171';
+    const rating = s.avgRpm >= 3.0 ? '⭐⭐⭐ Excellent' : s.avgRpm >= 2.5 ? '⭐⭐ Good' : s.avgRpm >= 2.0 ? '⭐ Fair' : '⚠ Below Min';
+    const ratingColor = s.avgRpm >= 3.0 ? '#4ade80' : s.avgRpm >= 2.5 ? '#60a5fa' : s.avgRpm >= 2.0 ? '#f4a935' : '#f87171';
+    return `<tr>
+      <td style="font-weight:600;color:#e5e7eb;">${name}</td>
+      <td style="text-align:center;color:#9ca3af;">${s.count}</td>
+      <td style="text-align:right;color:#4ade80;">$${s.totalPay.toLocaleString('en-US',{maximumFractionDigits:0})}</td>
+      <td style="text-align:right;color:#9ca3af;">${s.totalMiles.toLocaleString('en-US',{maximumFractionDigits:0})}</td>
+      <td style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:${rpmColor};">$${s.avgRpm.toFixed(2)}</td>
+      <td style="text-align:center;color:#4ade80;font-size:12px;">$${s.maxRpm.toFixed(2)}</td>
+      <td style="text-align:center;color:#f87171;font-size:12px;">$${s.minRpm.toFixed(2)}</td>
+      <td style="text-align:center;font-size:11px;color:${ratingColor};">${rating}</td>
+    </tr>`;
+  }).join('');
+
+  // Lane table
+  const lanes = Object.entries(HIST.laneSummary).filter(([,v]) => v.count >= 3);
+  lanes.sort((a,b) => b[1].count - a[1].count);
+  document.getElementById('lane-tbody').innerHTML = lanes.slice(0,40).map(([key, s]) => {
+    const rpmColor = s.avgRpm >= 2.5 ? '#4ade80' : s.avgRpm >= 2.0 ? '#f4a935' : '#f87171';
+    const rec = s.avgRpm >= 3.0 ? '✅ Priority lane' : s.avgRpm >= 2.5 ? '👍 Good lane' : s.avgRpm < 2.0 ? '⚠ Avoid or renegotiate' : '➡ Acceptable';
+    return `<tr>
+      <td style="font-weight:700;color:#22d3ee;font-family:'Barlow Condensed',sans-serif;font-size:15px;">${s.from} → ${s.to}</td>
+      <td style="text-align:center;color:#9ca3af;">${s.count}</td>
+      <td style="text-align:right;color:#e5e7eb;">$${s.avgPay.toLocaleString('en-US',{maximumFractionDigits:0})}</td>
+      <td style="text-align:right;color:#9ca3af;">${s.avgMiles.toLocaleString('en-US',{maximumFractionDigits:0})} mi</td>
+      <td style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:${rpmColor};">$${s.avgRpm.toFixed(2)}</td>
+      <td style="text-align:center;color:#4ade80;font-size:12px;">$${s.maxRpm.toFixed(2)}</td>
+      <td style="text-align:center;font-size:11px;">${rec}</td>
+    </tr>`;
+  }).join('');
+}
+
+function exportBrokerReport() {
+  if (!HIST) return;
+  const rows = [['Broker','Loads','Total Revenue','Total Miles','Avg RPM','Best RPM','Worst RPM']];
+  Object.entries(HIST.brokerPerformance).forEach(([name,s]) => {
+    rows.push([name, s.count, s.totalPay.toFixed(2), s.totalMiles.toFixed(1), s.avgRpm.toFixed(2), s.maxRpm.toFixed(2), s.minRpm.toFixed(2)]);
+  });
+  const nl = String.fromCharCode(10);
+  const q = '"';
+  const csv = rows.map(r => r.map(v => q + String(v).replace(new RegExp(q,'g'), q+q) + q).join(',')).join(nl);
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'broker-performance.csv';
+  a.click();
+  showToast('Exported!');
+}
+
+// ===== DRIVER MILEAGE REPORT =====
+let miSort = 'miles';
+
+function setMiSort(s, btn) {
+  miSort = s;
+  document.querySelectorAll('#page-mileage .fpill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMileage();
+}
+
+function renderMileage() {
+  if (!HIST) return;
+  const search = (document.getElementById('mi-search')?.value||'').toLowerCase();
+  let drivers = Object.entries(HIST.driverMileage).filter(([n]) => !search || n.toLowerCase().includes(search));
+  drivers.sort((a,b) => {
+    if (miSort==='miles') return b[1].miles - a[1].miles;
+    if (miSort==='pay') return b[1].pay - a[1].pay;
+    if (miSort==='loads') return b[1].loads - a[1].loads;
+    return 0;
+  });
+
+  document.getElementById('mileage-tbody').innerHTML = drivers.map(([name, s], i) => {
+    const rpmColor = s.avgRpm >= 2.5 ? '#4ade80' : '#f87171';
+    const pay70 = Math.round(s.miles * 0.70);
+    const pay65 = Math.round(s.miles * 0.65);
+    const pay63 = Math.round(s.miles * 0.63);
+    return `<tr>
+      <td style="color:#6b7490;font-size:11px;">${i+1}</td>
+      <td style="font-weight:600;color:#e5e7eb;">${name}</td>
+      <td style="text-align:center;color:#9ca3af;">${s.loads}</td>
+      <td style="text-align:right;font-weight:700;color:#f4a935;">${s.miles.toLocaleString('en-US',{maximumFractionDigits:0})}</td>
+      <td style="text-align:right;color:#4ade80;">$${s.pay.toLocaleString('en-US',{maximumFractionDigits:0})}</td>
+      <td style="text-align:center;font-weight:700;color:${rpmColor};">$${s.avgRpm.toFixed(2)}</td>
+      <td style="text-align:right;color:#d1d5db;">$${pay70.toLocaleString()}</td>
+      <td style="text-align:right;color:#d1d5db;">$${pay65.toLocaleString()}</td>
+      <td style="text-align:right;color:#d1d5db;">$${pay63.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+
+  // Update stats
+  const total = Object.values(HIST.driverMileage);
+  document.getElementById('mi-total-drivers').textContent = total.length;
+  document.getElementById('mi-total-miles').textContent = (total.reduce((a,d)=>a+d.miles,0)/1e6).toFixed(2)+'M';
+  document.getElementById('mi-avg-miles').textContent = Math.round(total.reduce((a,d)=>a+d.miles,0)/total.length).toLocaleString();
+  document.getElementById('mi-total-pay').textContent = '$'+(total.reduce((a,d)=>a+d.pay,0)/1e6).toFixed(2)+'M';
+}
+
+function exportMileageReport() {
+  if (!HIST) return;
+  const rows = [['Driver','Loads','Total Miles','Load Pay','Avg RPM','Pay @70CPM','Pay @65CPM','Pay @63CPM']];
+  Object.entries(HIST.driverMileage).sort((a,b)=>b[1].miles-a[1].miles).forEach(([name,s]) => {
+    rows.push([name, s.loads, s.miles.toFixed(1), s.pay.toFixed(2), s.avgRpm.toFixed(2),
+      (s.miles*0.70).toFixed(2), (s.miles*0.65).toFixed(2), (s.miles*0.63).toFixed(2)]);
+  });
+  const nl = String.fromCharCode(10);
+  const q = '"';
+  const csv = rows.map(r => r.map(v => q + String(v).replace(new RegExp(q,'g'), q+q) + q).join(',')).join(nl);
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'driver-mileage.csv';
+  a.click();
+  showToast('Exported!');
+}
+
+// ===== ENHANCED RATE INTEL WITH HISTORY =====
+const origCalcRate = calcRate;
+function calcRate() {
+  origCalcRate();
+  // Show historical data after calculating
+  const origin = document.getElementById('ri-origin').value;
+  const dest = document.getElementById('ri-dest').value;
+  const broker = document.getElementById('ri-broker').value;
+
+  const laneData = getHistoricalLaneData(origin, dest);
+  const brokerData = getHistoricalBrokerData(broker);
+
+  let histHtml = '';
+  if (laneData) {
+    const level = laneData.level === 'city' ? `${origin.split(',')[0]} → ${dest.split(',')[0]}` : `${origin.split(',').pop().trim()} → ${dest.split(',').pop().trim()} (state avg)`;
+    histHtml += `<div style="background:#0a1a2e;border:1px solid #1e3a5f;border-radius:8px;padding:12px 14px;margin-top:10px;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#60a5fa;text-transform:uppercase;margin-bottom:8px;">📊 Your History — ${level} (${laneData.entries} loads)</div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;">
+        <div><div style="font-size:10px;color:#6b7490;">Avg Paid</div><div style="font-size:18px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:#f4a935;">$${laneData.avgRpm}/mi</div></div>
+        <div><div style="font-size:10px;color:#6b7490;">Best</div><div style="font-size:18px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:#4ade80;">$${laneData.maxRpm}/mi</div></div>
+        <div><div style="font-size:10px;color:#6b7490;">Worst</div><div style="font-size:18px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:#f87171;">$${laneData.minRpm}/mi</div></div>
+      </div>
+    </div>`;
+  }
+  if (brokerData) {
+    histHtml += `<div style="background:#0f2d1a;border:1px solid #166534;border-radius:8px;padding:12px 14px;margin-top:8px;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:#4ade80;text-transform:uppercase;margin-bottom:8px;">🤝 ${broker || 'Broker'} History (${brokerData.count} loads with you)</div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;">
+        <div><div style="font-size:10px;color:#6b7490;">Avg RPM</div><div style="font-size:18px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:${brokerData.avgRpm>=2.5?'#4ade80':'#f87171'};">$${brokerData.avgRpm.toFixed(2)}/mi</div></div>
+        <div><div style="font-size:10px;color:#6b7490;">Best RPM</div><div style="font-size:18px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:#4ade80;">$${brokerData.maxRpm.toFixed(2)}/mi</div></div>
+        <div><div style="font-size:10px;color:#6b7490;">Total Revenue</div><div style="font-size:18px;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:#f4a935;">$${brokerData.totalPay.toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>
+      </div>
+    </div>`;
+  }
+  if (histHtml) {
+    const result = document.getElementById('rate-result');
+    let histDiv = document.getElementById('ri-hist');
+    if (!histDiv) { histDiv = document.createElement('div'); histDiv.id = 'ri-hist'; result.appendChild(histDiv); }
+    histDiv.innerHTML = `<div style="margin-top:14px;"><div class="lbl">Your Historical Data</div>${histHtml}</div>`;
+  }
+}
+
+// ===== LOAD HISTORY INTO LOAD BOARD =====
+function loadHistoryIntoLoadBoard() {
+  if (!HIST) return;
+  const recent = HIST.loads.filter(l => l.status === 'dispatched' || l.status === 'in_transit' || l.status === 'delivered').slice(0, 20);
+  recent.forEach(l => {
+    if (loads.find(ld => ld.loadId === l.loadId)) return;
+    if (!l.pay || !l.pickupCity) return;
+    loads.unshift({
+      id: 'hist_' + l.shipmentId,
+      loadNumber: l.loadId,
+      broker: l.broker,
+      commodity: 'General Freight',
+      equipment: l.equipment,
+      rate: l.pay,
+      loadedMiles: l.miles,
+      totalMiles: l.miles,
+      status: l.status === 'dispatched' ? 'assigned' : l.status === 'in_transit' ? 'assigned' : 'sent',
+      assignedDriver: l.driver ? { name: l.driver, truck: l.truck || '—' } : null,
+      source: 'Historical Import',
+      emailNotes: `Imported from load history
+Driver: ${l.driver}
+Truck: ${l.truck}`,
+      stops: [
+        { stopNumber:1, type:'PU', company:'Shipper', address:'', city:l.pickupCity, state:l.pickupState, zip:'', date:l.delDate, timeWindow:'', reference:null, instructions:null },
+        { stopNumber:2, type:'DEL', company:'Consignee', address:'', city:l.deliveryCity, state:l.deliveryState, zip:'', date:l.delDate, timeWindow:'', reference:null, instructions:null }
+      ],
+      specialInstructions: null,
+      createdAt: l.delDate,
+    });
+  });
+  renderLoads();
 }
 
 // Run session check immediately — DOM is ready since script is at bottom of body
