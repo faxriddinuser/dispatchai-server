@@ -138,5 +138,14 @@ app.post('/generate-message', async (req, res) => {
     res.json({ message: data.content?.[0]?.text || 'Error generating message' });
   } catch(e) { res.status(400).json({ error: e.message }); }
 });
-
+app.get('/debug', (req, res) => {
+  const cid = process.env.GOOGLE_CLIENT_ID || 'NOT SET';
+  res.json({
+    client_id_set: !!process.env.GOOGLE_CLIENT_ID,
+    client_id_preview: cid.slice(0,20) + '...' + cid.slice(-30),
+    client_id_length: cid.length,
+    client_secret_set: !!process.env.GOOGLE_CLIENT_SECRET,
+    redirect_uri: process.env.REDIRECT_URI || 'NOT SET'
+  });
+});
 app.listen(PORT, () => console.log(`DispatchAI running on port ${PORT}`));
