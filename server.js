@@ -11,9 +11,11 @@ const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI || 'https://dispatchai-server-production.up.railway.app/callback';
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
+const MAPS_KEY = process.env.GOOGLE_MAPS_API_KEY;
 const PORT = process.env.PORT || 3000;
 
 let tokens = {};
+let serverSessions = {}; // username -> { role, ts }
 
 app.get('/debug', (req, res) => {
   const cid = process.env.GOOGLE_CLIENT_ID || 'NOT SET';
@@ -224,6 +226,105 @@ Return ONLY the message. Use real data from the stops above.`;
   } catch(e) { res.status(400).json({ error: e.message }); }
 });
 
+// ─── GOOGLE MAPS MILES ───────────────────────────────────
+app.post('/miles', async (req, res) => {
+  try {
+    if (!MAPS_KEY) return res.status(400).json({ error: 'GOOGLE_MAPS_API_KEY not set in Railway Variables' });
+    const { origin, destination } = req.body;
+    if (!origin || !destination) return res.status(400).json({ error: 'origin and destination required' });
+
+    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?` +
+      `origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destination)}` +
+      `&units=imperial&mode=driving&key=${MAPS_KEY}`;
+
+    const r = await fetch(url);
+    const data = await r.json();
+
+    if (data.status !== 'OK') {
+      console.error('Maps API error:', data.status, data.error_message);
+      return res.status(400).json({ error: data.error_message || data.status });
+    }
+
+    const el = data.rows?.[0]?.elements?.[0];
+    if (!el || el.status !== 'OK') {
+      return res.status(400).json({ error: 'Route not found between these locations' });
+    }
+
+    const miles = Math.round(el.distance.value * 0.000621371); // meters to miles
+    const durationSecs = el.duration.value;
+    const hours = Math.floor(durationSecs / 3600);
+    const mins = Math.floor((durationSecs % 3600) / 60);
+    const driveTime = hours + 'h ' + mins + 'm';
+
+    console.log(`Miles: ${origin} → ${destination} = ${miles} mi (${driveTime})`);
+    res.json({ miles, driveTime, origin, destination });
+  } catch(e) {
+    console.error('Miles error:', e.message);
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// ─── MULTI-STOP MILES ─────────────────────────────────────
+// Calculates total miles across multiple stops in sequence
+app.post('/miles/route', async (req, res) => {
+  try {
+    if (!MAPS_KEY) return res.status(400).json({ error: 'GOOGLE_MAPS_API_KEY not set' });
+    const { stops } = req.body; // array of address strings
+    if (!stops || stops.length < 2) return res.status(400).json({ error: 'Need at least 2 stops' });
+
+    let totalMiles = 0;
+    let totalSecs = 0;
+    const legs = [];
+
+    for (let i = 0; i < stops.length - 1; i++) {
+      const url = `https://maps.googleapis.com/maps/api/distancematrix/json?` +
+        `origins=${encodeURIComponent(stops[i])}&destinations=${encodeURIComponent(stops[i+1])}` +
+        `&units=imperial&mode=driving&key=${MAPS_KEY}`;
+
+      const r = await fetch(url);
+      const data = await r.json();
+      const el = data.rows?.[0]?.elements?.[0];
+
+      if (el && el.status === 'OK') {
+        const legMiles = Math.round(el.distance.value * 0.000621371);
+        totalMiles += legMiles;
+        totalSecs += el.duration.value;
+        legs.push({ from: stops[i], to: stops[i+1], miles: legMiles });
+      }
+    }
+
+    const hours = Math.floor(totalSecs / 3600);
+    const mins = Math.floor((totalSecs % 3600) / 60);
+    res.json({ totalMiles, driveTime: hours + 'h ' + mins + 'm', legs });
+  } catch(e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// Session endpoints
+app.post('/session/save', (req, res) => {
+  const { username, role } = req.body;
+  if (!username) return res.status(400).json({ error: 'No username' });
+  serverSessions[username] = { role, ts: Date.now() };
+  res.json({ ok: true });
+});
+
+app.get('/session/check/:username', (req, res) => {
+  const s = serverSessions[req.params.username];
+  if (!s) return res.json({ valid: false });
+  // 24 hour expiry
+  if (Date.now() - s.ts > 24 * 60 * 60 * 1000) {
+    delete serverSessions[req.params.username];
+    return res.json({ valid: false });
+  }
+  res.json({ valid: true, role: s.role });
+});
+
+app.post('/session/clear/:username', (req, res) => {
+  delete serverSessions[req.params.username];
+  res.json({ ok: true });
+});
 
 app.listen(PORT, () => console.log(`DispatchAI server running on port ${PORT}`));
