@@ -229,7 +229,7 @@ select.inp option{background:#111827;}
 <body>
 
 <!-- LOGIN PAGE -->
-<div id="login-page">
+<div id="login-page" style="display:none;">
 <div class="login-wrap">
 <div class="login-box">
   <div class="login-logo">DISPATCH<span>AI</span></div>
@@ -644,7 +644,7 @@ function doLogin() {
   if (!USERS[u] || USERS[u].pass !== p) { err.textContent = 'Invalid username or password.'; return; }
   err.textContent = '';
   currentUser = { username: u, ...USERS[u] };
-  localStorage.setItem('dai_session', JSON.stringify({ username: u, ts: Date.now() }));
+  localStorage.setItem('dai_session', JSON.stringify({ username: u, ts: Date.now(), role: USERS[u].role }));
   startSession();
   logActivity('Signed in', '');
 }
@@ -674,13 +674,19 @@ function checkSavedSession() {
   try {
     const saved = localStorage.getItem('dai_session');
     if (!saved) return false;
-    const { username, ts } = JSON.parse(saved);
-    // Session expires after 12 hours
-    if (Date.now() - ts > 12 * 60 * 60 * 1000) { localStorage.removeItem('dai_session'); return false; }
+    const parsed = JSON.parse(saved);
+    const username = parsed.username;
+    const ts = parsed.ts;
+    if (!username || !ts) return false;
+    // Session expires after 24 hours
+    if (Date.now() - ts > 24 * 60 * 60 * 1000) { localStorage.removeItem('dai_session'); return false; }
     if (!USERS[username]) return false;
-    currentUser = { username, ...USERS[username] };
+    currentUser = { username: username, ...USERS[username] };
     return true;
-  } catch(e) { return false; }
+  } catch(e) {
+    localStorage.removeItem('dai_session');
+    return false;
+  }
 }
 
 function setupRoleAccess() {
@@ -1323,12 +1329,14 @@ function initApp() {
   if (btn) { showPage(firstTab, btn); btn.classList.add('active'); }
 }
 
-// Auto-login check on page load
-window.addEventListener('load', () => {
+// Run session check immediately — DOM is ready since script is at bottom of body
+(function() {
   if (checkSavedSession()) {
     startSession();
+  } else {
+    document.getElementById('login-page').style.display = 'flex';
   }
-});
+})();
 </script>
 </body>
 </html>
