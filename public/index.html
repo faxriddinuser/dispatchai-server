@@ -216,6 +216,9 @@ select.inp option{background:#111827;}
 /* TOAST */
 .toast{position:fixed;bottom:22px;right:22px;background:#f4a935;color:#111;padding:10px 20px;border-radius:8px;font-weight:700;font-size:13px;z-index:9999;transition:opacity .3s;box-shadow:0 4px 20px rgba(0,0,0,.4);}
 .toast.err{background:#f87171;color:#fff;}
+.finp{background:#0d1320;border:1px solid #2d3748;border-radius:5px;color:#f9fafb;font-family:'Barlow',sans-serif;font-size:11px;padding:4px 7px;outline:none;width:100%;transition:border-color .15s;}
+.finp:focus{border-color:#f4a935;background:#111827;}
+.finp:hover{border-color:#374151;}
 
 /* GRID */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
@@ -300,6 +303,9 @@ select.inp option{background:#111827;}
       <button class="fpill" onclick="setFF('ily',this)">ILY</button>
       <button class="fpill" onclick="setFF('box',this)">BOX</button>
       <input class="inp" id="fleet-search" placeholder="Search..." style="margin-left:auto;width:200px;font-size:12px;" oninput="renderFleet()">
+    </div>
+    <div style="margin-bottom:8px;font-size:11px;color:#6b7490;display:flex;align-items:center;gap:8px;">
+      <span id="fleet-edit-hint" style="display:none;">✏ <strong style="color:#f4a935;">Click any cell to edit.</strong> Changes are tracked with full history.</span>
     </div>
     <div class="tbl-wrap"><table class="ftbl"><thead><tr>
       <th style="width:60px;">PM</th><th>Load #</th><th>Truck #</th><th>Trailer #</th>
@@ -547,7 +553,12 @@ select.inp option{background:#111827;}
           <option value="Update">Update</option>
           <option value="Accounting">Accounting</option>
         </select>
-        <button class="btn-sec" onclick="activityLog=[];renderActivityLog()" style="font-size:11px;padding:5px 10px;">Clear Log</button>
+        <select class="inp" id="act-filter-type" onchange="renderActivityLog()" style="font-size:12px;padding:5px 10px;">
+          <option value="">All Changes</option>
+          <option value="fleet_change">Fleet Board Only</option>
+        </select>
+        <button class="btn-sec" onclick="exportActivityLog()" style="font-size:11px;padding:5px 10px;">📥 Export CSV</button>
+        <button class="btn-sec" onclick="activityLog=[];renderActivityLog()" style="font-size:11px;padding:5px 10px;">🗑 Clear</button>
       </div>
     </div>
     <div id="activity-log-container" style="background:#111827;border:1px solid #2d3748;border-radius:8px;max-height:600px;overflow-y:auto;">
@@ -601,9 +612,9 @@ const ROLE_TABS = {
 
 const ROLE_CAN_EDIT = {
   Manager: ['fleet','lanes','loads','gross'],
-  Dispatcher: ['lanes','loads','gross'],
+  Dispatcher: ['fleet','lanes','loads','gross'],
   Fleet: ['fleet'],
-  Update: ['lanes','loads','fleet'],
+  Update: ['fleet','lanes','loads','gross'],
   Accounting: [],
 };
 
@@ -685,18 +696,37 @@ function logActivity(action, detail) {
 
 function renderActivityLog() {
   const filter = document.getElementById('act-filter-role')?.value || '';
-  const filtered = filter ? activityLog.filter(e => e.role === filter) : activityLog;
+  const typeFilter = document.getElementById('act-filter-type')?.value || '';
+  let filtered = filter ? activityLog.filter(e => e.role === filter) : activityLog;
+  if (typeFilter) filtered = filtered.filter(e => e.type === typeFilter);
   const c = document.getElementById('activity-log-container');
   if (!filtered.length) { c.innerHTML = '<div style="text-align:center;padding:30px;color:#4a5570;font-size:13px;">No activity recorded yet.</div>'; return; }
   const roleColors = {Manager:'role-manager',Dispatcher:'role-dispatch',Fleet:'role-fleet',Update:'role-update',Accounting:'role-accounting'};
-  c.innerHTML = filtered.map(e => `
-    <div class="activity-entry">
-      <span class="act-time">${e.ts.toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span>
+  c.innerHTML = filtered.map(e => {
+    const time = e.ts.toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    if (e.type === 'fleet_change') {
+      return `<div class="activity-entry" style="border-left:3px solid #f4a935;">
+        <span class="act-time">${time}</span>
+        <span class="act-user">${e.user}</span>
+        <span class="role-badge ${roleColors[e.role]||''} act-role">${e.role}</span>
+        <div style="flex:1;">
+          <div class="act-action">🚛 Truck #${e.truck} <span style="color:#9ca3af;font-size:11px;">— ${e.driver}</span></div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;">
+            <span style="background:#1f2937;border:1px solid #374151;border-radius:4px;font-size:10px;font-weight:700;padding:2px 8px;color:#9ca3af;">${e.field}</span>
+            <span style="background:#2d0f0f;border-radius:4px;font-size:11px;padding:2px 10px;color:#f87171;text-decoration:line-through;">${e.oldVal}</span>
+            <span style="color:#6b7490;">→</span>
+            <span style="background:#0f2d1a;border-radius:4px;font-size:11px;padding:2px 10px;color:#4ade80;font-weight:600;">${e.newVal}</span>
+          </div>
+        </div>
+      </div>`;
+    }
+    return `<div class="activity-entry">
+      <span class="act-time">${time}</span>
       <span class="act-user">${e.user}</span>
       <span class="role-badge ${roleColors[e.role]||''} act-role">${e.role}</span>
       <div><div class="act-action">${e.action}</div>${e.detail?`<div class="act-detail">${e.detail}</div>`:''}</div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 // ===== FLEET DATA =====
@@ -744,39 +774,123 @@ function renderFleet() {
   else if (fleetFilter==='box') filtered=filtered.filter(t=>t.company==='box');
   if (search) filtered=filtered.filter(t=>t.driver.toLowerCase().includes(search)||t.truck.toLowerCase().includes(search)||(t.load&&t.load.toLowerCase().includes(search))||t.loc.toLowerCase().includes(search));
   const canEdit = (ROLE_CAN_EDIT[currentUser?.role]||[]).includes('fleet');
+  const hint = document.getElementById('fleet-edit-hint');
+  if (hint) hint.style.display = canEdit ? 'flex' : 'none';
   const tbody = document.getElementById('fleet-tbody');
   tbody.innerHTML = filtered.map(t => {
     const isHome=['Home','OOS','FIRED'].includes(t.status);
     const rc=isHome?'row-home':t.status==='Ready'?'row-ready':'row-active';
     const dc=t.company==='box'?'drv-box':'drv-ily';
     const sc=STATUS_CLASS[t.status]||'s-ready';
-    const trlCell=t.bookedTrl?`<span class="trl-booked">${t.trailer}</span>`:`<span style="color:#d1d5db;">${t.trailer}</span>`;
-    const loadCell=t.overdue?`<span class="load-overdue">⚠ ${t.load}</span>`:`<span style="color:#d1d5db;">${t.load||'—'}</span>`;
     const pmCell=t.pm==='Overdue'?`<span class="pm-overdue">OVERDUE</span>`:t.pm==='Soon'?`<span class="pm-soon">SOON</span>`:'';
-    const statusCell=canEdit&&fleetEditMode
-      ?`<select class="inp" style="font-size:11px;padding:3px 6px;" onchange="updateFleetStatus('${t.truck}',this.value)">${STATUSES.map(s=>`<option${s===t.status?' selected':''}>${s}</option>`).join('')}</select>`
-      :`<span class="sbadge ${sc}">${t.status}</span>`;
-    return `<tr class="${rc}"><td>${pmCell}</td><td>${loadCell}</td><td style="font-weight:600;color:#e5e7eb;">${t.truck}</td><td>${trlCell}</td><td class="${dc}">${t.driver}</td><td style="color:#9ca3af;font-size:11px;">${t.phone}</td><td style="color:#6b7490;font-size:11px;">${t.disp}</td><td>${statusCell}</td><td style="color:#d1d5db;font-size:11px;">${t.loc}</td><td style="color:#9ca3af;font-size:11px;">${t.dest||'—'}</td></tr>`;
+
+    if (canEdit) {
+      // Fully editable row
+      const trlStyle = t.bookedTrl ? 'background:#7f1d1d;color:#fca5a5;font-weight:700;border-color:#7f1d1d;' : '';
+      const loadStyle = t.overdue ? 'color:#f87171;font-weight:700;border-color:#7f1d1d;' : '';
+      return `<tr class="${rc}" id="frow-${t.truck}">
+        <td>
+          <select class="finp" style="width:80px;font-size:10px;" onchange="updateFleetField('${t.truck}','pm',this.value)">
+            <option value="" ${!t.pm?'selected':''}>—</option>
+            <option value="Soon" ${t.pm==='Soon'?'selected':''}>Soon</option>
+            <option value="Overdue" ${t.pm==='Overdue'?'selected':''}>Overdue</option>
+          </select>
+        </td>
+        <td><input class="finp" style="${loadStyle}" value="${t.load||''}" placeholder="Load #" onchange="updateFleetField('${t.truck}','load',this.value)"></td>
+        <td style="font-weight:600;color:#e5e7eb;">${t.truck}</td>
+        <td>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <input class="finp" style="${trlStyle}" value="${t.trailer||''}" placeholder="Trailer #" onchange="updateFleetField('${t.truck}','trailer',this.value)">
+            <label style="display:flex;align-items:center;gap:3px;font-size:10px;color:#6b7490;cursor:pointer;white-space:nowrap;" title="Booked trailer — cannot drop">
+              <input type="checkbox" ${t.bookedTrl?'checked':''} style="accent-color:#f87171;" onchange="updateFleetField('${t.truck}','bookedTrl',this.checked)"> 🔒
+            </label>
+          </div>
+        </td>
+        <td class="${dc}">${t.driver}</td>
+        <td><input class="finp" style="color:#9ca3af;" value="${t.phone||''}" placeholder="Phone" onchange="updateFleetField('${t.truck}','phone',this.value)"></td>
+        <td>
+          <select class="finp" style="font-size:11px;" onchange="updateFleetField('${t.truck}','disp',this.value)">
+            ${['Bob / Harry','Hugo / Freddy','Myles / Theodore','Austin / Kennedy'].map(d=>`<option ${t.disp===d?'selected':''}>${d}</option>`).join('')}
+          </select>
+        </td>
+        <td>
+          <select class="finp" style="font-size:11px;" onchange="updateFleetField('${t.truck}','status',this.value)">
+            ${STATUSES.map(s=>`<option ${s===t.status?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </td>
+        <td><input class="finp" value="${t.loc||''}" placeholder="Current location" onchange="updateFleetField('${t.truck}','loc',this.value)"></td>
+        <td><input class="finp" value="${t.dest||''}" placeholder="Destination" onchange="updateFleetField('${t.truck}','dest',this.value)"></td>
+      </tr>`;
+    } else {
+      // Read-only row
+      const trlCell=t.bookedTrl?`<span class="trl-booked">${t.trailer}</span>`:`<span style="color:#d1d5db;">${t.trailer}</span>`;
+      const loadCell=t.overdue?`<span class="load-overdue">⚠ ${t.load}</span>`:`<span style="color:#d1d5db;">${t.load||'—'}</span>`;
+      return `<tr class="${rc}"><td>${pmCell}</td><td>${loadCell}</td><td style="font-weight:600;color:#e5e7eb;">${t.truck}</td><td>${trlCell}</td><td class="${dc}">${t.driver}</td><td style="color:#9ca3af;font-size:11px;">${t.phone}</td><td style="color:#6b7490;font-size:11px;">${t.disp}</td><td><span class="sbadge ${sc}">${t.status}</span></td><td style="color:#d1d5db;font-size:11px;">${t.loc}</td><td style="color:#9ca3af;font-size:11px;">${t.dest||'—'}</td></tr>`;
+    }
   }).join('');
 }
 
-function updateFleetStatus(truck, newStatus) {
+const FIELD_LABELS = {pm:'PM Warning',load:'Load #',trailer:'Trailer #',bookedTrl:'Booked Trailer',phone:'Phone',disp:'Dispatcher',status:'Status',loc:'Current Location',dest:'Destination'};
+
+function updateFleetField(truck, field, value) {
   const t = FLEET.find(f=>f.truck===truck);
   if (!t) return;
-  const old = t.status;
-  t.status = newStatus;
-  logActivity('Updated fleet status', `Truck #${truck} — ${old} → ${newStatus}`);
-  showToast('Status updated: Truck #' + truck);
+  const oldVal = t[field];
+  if (String(oldVal) === String(value)) return; // no change
+  t[field] = value;
+  // Re-apply row color if status changed
+  if (field === 'status') {
+    const row = document.getElementById('frow-' + truck);
+    if (row) {
+      const isHome=['Home','OOS','FIRED'].includes(value);
+      row.className = isHome?'row-home':value==='Ready'?'row-ready':'row-active';
+    }
+  }
+  const fieldLabel = FIELD_LABELS[field] || field;
+  const oldDisplay = oldVal === true ? 'Yes' : oldVal === false ? 'No' : (oldVal || '(empty)');
+  const newDisplay = value === true ? 'Yes' : value === false ? 'No' : (value || '(empty)');
+  logFleetChange(truck, t.driver, fieldLabel, oldDisplay, newDisplay);
 }
 
-function toggleFleetEdit() {
-  fleetEditMode = !fleetEditMode;
-  const btn = document.getElementById('fleet-edit-btn');
-  btn.textContent = fleetEditMode ? '✓ Done Editing' : '✏ Edit Mode';
-  btn.style.background = fleetEditMode ? '#f4a935' : '';
-  btn.style.color = fleetEditMode ? '#111' : '';
-  renderFleet();
+function exportActivityLog() {
+  if (!activityLog.length) { showToast('No activity to export', 'err'); return; }
+  const rows = [['Timestamp','User','Role','Truck #','Driver','Field','Old Value','New Value','Action','Detail']];
+  activityLog.forEach(e => {
+    rows.push([
+      e.ts.toLocaleString(),
+      e.user, e.role,
+      e.truck||'', e.driver||'',
+      e.field||'', e.oldVal||'', e.newVal||'',
+      e.action||'', e.detail||''
+    ]);
+  });
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'dispatchai-activity-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  showToast('Activity log exported!');
 }
+
+function logFleetChange(truck, driver, field, oldVal, newVal) {
+  if (!currentUser) return;
+  const entry = {
+    ts: new Date(),
+    user: currentUser.name,
+    username: currentUser.username,
+    role: currentUser.role,
+    type: 'fleet_change',
+    truck, driver, field,
+    oldVal: String(oldVal),
+    newVal: String(newVal),
+    action: `Fleet Board — Truck #${truck}`,
+    detail: `${field}: "${oldVal}" → "${newVal}"`
+  };
+  activityLog.unshift(entry);
+  renderActivityLog();
+}
+
+function toggleFleetEdit() {} // kept for compatibility
 
 // ===== DEDICATED LANES =====
 let LANES = [
