@@ -1072,8 +1072,10 @@ async function genMsg(load) {
   const stops=(load.stops||[]).map((s,i)=>`Stop ${i+1} (${s.type}): ${s.company}, ${s.address}, ${s.city} ${s.state} ${s.zip} — ${s.date} @ ${s.timeWindow}${s.reference?' Ref:'+s.reference:''}${s.instructions?' NOTE:'+s.instructions:''}`).join('\n');
   const notes=load.customNotes||document.getElementById('modal-notes').value||'';
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:MODEL,max_tokens:700,system:'Generate driver dispatch messages with real load data. Return only the message.',messages:[{role:'user',content:`Generate driver dispatch text:\nDriver: ${load.assignedDriver.name}, Truck #${load.assignedDriver.truck}\nLoad #: ${load.loadNumber} | Broker: ${load.broker}\nMiles: ${load.loadedMiles||'?'} loaded\n\nStops:\n${stops}\n${notes?'Extra: '+notes:''}\n\nFormat:\nHey [First Name]! 🚛\nLoad #: [num] | Broker: [name]\n━━━━━━━━━━━━━━━━━━\n📍 PICKUP\n[Company]\n[Full Address]\n📅 [Date] at [Time]\n━━━━━━━━━━━━━━━━━━\n📍 DELIVERY\n[Company]\n[Full Address]\n📅 [Date]: [Window]\n━━━━━━━━━━━━━━━━━━\n📏 [miles] mi loaded | 🚛 Truck #[truck]\n\n🔺 Do PTI before departure\n🔺 Send trailer photos to group\n🔺 Scale after pickup\n${notes?'🔺 '+notes:''}\nDrive safe! ✅\n\nReturn ONLY the message.`}]})});
-    const data=await res.json();currentMsgText=data.content?.[0]?.text||'Error';out.className='msg-out';out.textContent=currentMsgText;
+    const res=await fetch('/generate-message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({load,driver:load.assignedDriver,notes})});
+    const data=await res.json();
+    if(data.error)throw new Error(data.error);
+    currentMsgText=data.message||'Error generating message';out.className='msg-out';out.textContent=currentMsgText;
   }catch(e){out.className='msg-out';out.textContent='Error: '+e.message;}
 }
 
@@ -1111,7 +1113,14 @@ async function scanInbox(){
 
 async function processEmail(id){
   const email=emails.find(e=>e.id===id);if(!email)return;email.status='processing';renderEmails();emailLog('info',`Processing: "${email.subject}"`);
-  try{let created=0;for(const att of(email.attachments||[])){try{const ad=await gmailGet(`/gmail/v1/users/me/messages/${att.msgId}/attachments/${att.id}`);let b64=ad.data.replace(/-/g,'+').replace(/_/g,'/');while(b64.length%4)b64+='=';const isImg=att.mimeType?.startsWith('image/');const part=isImg?{type:'image',source:{type:'base64',media_type:att.mimeType,data:b64}}:{type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}};const EP=`Extract load info. Return ONLY valid JSON: {"loadNumber":"string","broker":"string","commodity":null,"equipment":null,"rate":null,"emptyMiles":null,"loadedMiles":null,"totalMiles":null,"weight":null,"stops":[{"stopNumber":1,"type":"PU","company":"string","address":"string","city":"string","state":"string","zip":"string","date":"string","timeWindow":"string","reference":null,"instructions":null}],"specialInstructions":null}`;const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:MODEL,max_tokens:1500,system:'Extract load data from rate confirmations. Return ONLY valid JSON.',messages:[{role:'user',content:[part,{type:'text',text:EP}]}]})});const data=await res.json();const ld=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());if(ld.loadNumber||ld.stops?.length){loads.unshift({...ld,id:'ld_'+Date.now()+'_'+Math.random().toString(36).slice(2),status:'unassigned',assignedDriver:null,source:email.from,emailNotes:`From: ${email.from}\nSubject: ${email.subject}\nDate: ${email.date}\n\n${email.snippet}`,createdAt:new Date().toISOString()});created++;emailLog('success',`Load extracted from ${att.name}`);logActivity('Extracted load from email',`${email.subject} → Load #${ld.loadNumber}`);}}catch(e){emailLog('error','Attachment failed: '+e.message);}}email.status=created>0?'done':'skipped';if(created)renderLoads();}catch(e){email.status='failed';emailLog('error','Failed: '+e.message);}
+  try{let created=0;for(const att of(email.attachments||[])){try{
+      const ad=await gmailGet(`/gmail/v1/users/me/messages/${att.msgId}/attachments/${att.id}`);
+      const er=await fetch('/extract',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({b64:ad.data,mimeType:att.mimeType,emailNotes:`From: ${email.from}\nSubject: ${email.subject}\nDate: ${email.date}\n\n${email.snippet}`})});
+      const ed=await er.json();
+      if(ed.error)throw new Error(ed.error);
+      const ld=ed.load;
+      if(ld&&(ld.loadNumber||ld.stops?.length)){loads.unshift({...ld,id:'ld_'+Date.now()+'_'+Math.random().toString(36).slice(2),status:'unassigned',assignedDriver:null,source:email.from,emailNotes:`From: ${email.from}\nSubject: ${email.subject}\nDate: ${email.date}\n\n${email.snippet}`,createdAt:new Date().toISOString()});created++;emailLog('success',`Load extracted from ${att.name}`);logActivity('Extracted load from email',`${email.subject}`);}
+    }catch(e){emailLog('error','Attachment failed: '+e.message);}}email.status=created>0?'done':'skipped';if(created)renderLoads();}catch(e){email.status='failed';emailLog('error','Failed: '+e.message);}
   renderEmails();
 }
 
