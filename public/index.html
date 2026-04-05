@@ -644,6 +644,12 @@ function doLogin() {
   if (!USERS[u] || USERS[u].pass !== p) { err.textContent = 'Invalid username or password.'; return; }
   err.textContent = '';
   currentUser = { username: u, ...USERS[u] };
+  localStorage.setItem('dai_session', JSON.stringify({ username: u, ts: Date.now() }));
+  startSession();
+  logActivity('Signed in', '');
+}
+
+function startSession() {
   document.getElementById('login-page').style.display = 'none';
   document.getElementById('main-app').style.display = 'block';
   document.getElementById('hdr-user').textContent = currentUser.name;
@@ -651,17 +657,30 @@ function doLogin() {
   rb.textContent = currentUser.role;
   rb.className = 'role-badge role-' + currentUser.role.toLowerCase();
   setupRoleAccess();
-  logActivity('Signed in', '');
   initApp();
 }
 
 function doLogout() {
   logActivity('Signed out', '');
   currentUser = null;
+  localStorage.removeItem('dai_session');
   document.getElementById('main-app').style.display = 'none';
   document.getElementById('login-page').style.display = 'block';
   document.getElementById('l-user').value = '';
   document.getElementById('l-pass').value = '';
+}
+
+function checkSavedSession() {
+  try {
+    const saved = localStorage.getItem('dai_session');
+    if (!saved) return false;
+    const { username, ts } = JSON.parse(saved);
+    // Session expires after 12 hours
+    if (Date.now() - ts > 12 * 60 * 60 * 1000) { localStorage.removeItem('dai_session'); return false; }
+    if (!USERS[username]) return false;
+    currentUser = { username, ...USERS[username] };
+    return true;
+  } catch(e) { return false; }
 }
 
 function setupRoleAccess() {
@@ -1298,12 +1317,18 @@ function initApp() {
   renderActivityLog();
   generateAIPicks();
   refreshBrokerLoads();
-  // Navigate to first allowed tab
   const allowed = ROLE_TABS[currentUser.role] || [];
   const firstTab = allowed[0] || 'fleet';
   const btn = document.getElementById('tnav-'+firstTab);
-  if (btn) { showPage(firstTab, btn); }
+  if (btn) { showPage(firstTab, btn); btn.classList.add('active'); }
 }
+
+// Auto-login check on page load
+window.addEventListener('load', () => {
+  if (checkSavedSession()) {
+    startSession();
+  }
+});
 </script>
 </body>
 </html>
