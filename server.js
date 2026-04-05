@@ -227,37 +227,142 @@ Return ONLY the message. Use real data from the stops above.`;
 });
 
 // ─── GOOGLE MAPS MILES ───────────────────────────────────
+
+// Clean and normalize city/address strings before sending to Maps API
+function cleanLocation(loc) {
+  if (!loc) return '';
+  let s = loc.toString().trim();
+  // Remove things like "Dock 14", "Gate A", warehouse instructions etc
+  s = s.replace(/(dock|gate|suite|ste|apt|unit|bldg|floor|fl|rm|room)\s*[\w#-]*/gi, '').trim();
+  // Fix common abbreviations
+  const stateMap = {
+    'AL':'Alabama','AK':'Alaska','AZ':'Arizona','AR':'Arkansas','CA':'California',
+    'CO':'Colorado','CT':'Connecticut','DE':'Delaware','FL':'Florida','GA':'Georgia',
+    'HI':'Hawaii','ID':'Idaho','IL':'Illinois','IN':'Indiana','IA':'Iowa',
+    'KS':'Kansas','KY':'Kentucky','LA':'Louisiana','ME':'Maine','MD':'Maryland',
+    'MA':'Massachusetts','MI':'Michigan','MN':'Minnesota','MS':'Mississippi','MO':'Missouri',
+    'MT':'Montana','NE':'Nebraska','NV':'Nevada','NH':'New Hampshire','NJ':'New Jersey',
+    'NM':'New Mexico','NY':'New York','NC':'North Carolina','ND':'North Dakota','OH':'Ohio',
+    'OK':'Oklahoma','OR':'Oregon','PA':'Pennsylvania','RI':'Rhode Island','SC':'South Carolina',
+    'SD':'South Dakota','TN':'Tennessee','TX':'Texas','UT':'Utah','VT':'Vermont',
+    'VA':'Virginia','WA':'Washington','WV':'West Virginia','WI':'Wisconsin','WY':'Wyoming',
+    'DC':'Washington DC'
+  };
+  // If it's just a state abbreviation, expand it
+  s = s.replace(/,\s*([A-Z]{2})\s*(\d{5}(-\d{4})?)?$/, (match, st, zip) => {
+    return ', ' + (stateMap[st] || st) + (zip ? ' ' + zip : '');
+  });
+  // Remove zip codes for cleaner geocoding
+  s = s.replace(/\s+\d{5}(-\d{4})?$/, '').trim();
+  // Remove extra whitespace
+  s = s.replace(/\s+/g, ' ').trim();
+  // Remove trailing commas
+  s = s.replace(/,+$/, '').trim();
+  return s;
+}
+
+// Use Google Geocoding API to resolve a fuzzy location to coordinates
+async function geocodeLocation(loc) {
+  const cleaned = cleanLocation(loc);
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cleaned)}&key=${MAPS_KEY}`;
+  const r = await fetch(url);
+  const data = await r.json();
+  if (data.status === 'OK' && data.results?.[0]) {
+    const result = data.results[0];
+    return {
+      formatted: result.formatted_address,
+      lat: result.geometry.location.lat,
+      lng: result.geometry.location.lng
+    };
+  }
+  return null;
+}
+
+// Use Claude to clean up messy location strings
+async function aiCleanLocation(loc) {
+  if (!ANTHROPIC_KEY) return loc;
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 50,
+        system: 'Extract just the city and state from this trucking address. Return ONLY "City, ST" format. No other text.',
+        messages: [{ role: 'user', content: loc }]
+      })
+    });
+    const data = await r.json();
+    return data.content?.[0]?.text?.trim() || loc;
+  } catch(e) { return loc; }
+}
+
+async function calcMilesBetween(origin, destination) {
+  // Try direct Distance Matrix first
+  const tryDistanceMatrix = async (orig, dest) => {
+    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?` +
+      `origins=${encodeURIComponent(orig)}&destinations=${encodeURIComponent(dest)}` +
+      `&units=imperial&mode=driving&key=${MAPS_KEY}`;
+    const r = await fetch(url);
+    const data = await r.json();
+    if (data.status !== 'OK') return null;
+    const el = data.rows?.[0]?.elements?.[0];
+    if (!el || el.status !== 'OK') return null;
+    const miles = Math.round(el.distance.value * 0.000621371);
+    const secs = el.duration.value;
+    return { miles, driveTime: Math.floor(secs/3600) + 'h ' + Math.floor((secs%3600)/60) + 'm' };
+  };
+
+  // Step 1: Try as-is
+  let result = await tryDistanceMatrix(origin, destination);
+  if (result) { console.log(`Direct match: ${origin} → ${destination} = ${result.miles} mi`); return result; }
+
+  // Step 2: Clean location strings and retry
+  const cleanOrig = cleanLocation(origin);
+  const cleanDest = cleanLocation(destination);
+  console.log(`Cleaned: "${cleanOrig}" → "${cleanDest}"`);
+  result = await tryDistanceMatrix(cleanOrig, cleanDest);
+  if (result) { return result; }
+
+  // Step 3: Geocode both locations to get precise coordinates
+  console.log('Trying geocoding...');
+  const [geoOrig, geoDest] = await Promise.all([geocodeLocation(origin), geocodeLocation(destination)]);
+  if (geoOrig && geoDest) {
+    const coordOrig = `${geoOrig.lat},${geoOrig.lng}`;
+    const coordDest = `${geoDest.lat},${geoDest.lng}`;
+    result = await tryDistanceMatrix(coordOrig, coordDest);
+    if (result) {
+      console.log(`Geocoded: ${geoOrig.formatted} → ${geoDest.formatted} = ${result.miles} mi`);
+      result.resolvedOrigin = geoOrig.formatted;
+      result.resolvedDest = geoDest.formatted;
+      return result;
+    }
+  }
+
+  // Step 4: Use Claude to extract clean city/state then retry
+  console.log('Trying AI cleanup...');
+  const [aiOrig, aiDest] = await Promise.all([aiCleanLocation(origin), aiCleanLocation(destination)]);
+  console.log(`AI cleaned: "${aiOrig}" → "${aiDest}"`);
+  result = await tryDistanceMatrix(aiOrig, aiDest);
+  if (result) { result.resolvedOrigin = aiOrig; result.resolvedDest = aiDest; return result; }
+
+  return null;
+}
+
 app.post('/miles', async (req, res) => {
   try {
     if (!MAPS_KEY) return res.status(400).json({ error: 'GOOGLE_MAPS_API_KEY not set in Railway Variables' });
     const { origin, destination } = req.body;
     if (!origin || !destination) return res.status(400).json({ error: 'origin and destination required' });
 
-    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?` +
-      `origins=${encodeURIComponent(origin)}&destinations=${encodeURIComponent(destination)}` +
-      `&units=imperial&mode=driving&key=${MAPS_KEY}`;
+    console.log(`Miles request: "${origin}" → "${destination}"`);
+    const result = await calcMilesBetween(origin, destination);
 
-    const r = await fetch(url);
-    const data = await r.json();
-
-    if (data.status !== 'OK') {
-      console.error('Maps API error:', data.status, data.error_message);
-      return res.status(400).json({ error: data.error_message || data.status });
+    if (!result) {
+      return res.status(400).json({ error: `Could not find route: "${origin}" → "${destination}". Try using City, State format (e.g. "Chicago, IL")` });
     }
 
-    const el = data.rows?.[0]?.elements?.[0];
-    if (!el || el.status !== 'OK') {
-      return res.status(400).json({ error: 'Route not found between these locations' });
-    }
-
-    const miles = Math.round(el.distance.value * 0.000621371); // meters to miles
-    const durationSecs = el.duration.value;
-    const hours = Math.floor(durationSecs / 3600);
-    const mins = Math.floor((durationSecs % 3600) / 60);
-    const driveTime = hours + 'h ' + mins + 'm';
-
-    console.log(`Miles: ${origin} → ${destination} = ${miles} mi (${driveTime})`);
-    res.json({ miles, driveTime, origin, destination });
+    res.json({ ...result, origin, destination });
   } catch(e) {
     console.error('Miles error:', e.message);
     res.status(400).json({ error: e.message });
@@ -265,37 +370,27 @@ app.post('/miles', async (req, res) => {
 });
 
 // ─── MULTI-STOP MILES ─────────────────────────────────────
-// Calculates total miles across multiple stops in sequence
 app.post('/miles/route', async (req, res) => {
   try {
     if (!MAPS_KEY) return res.status(400).json({ error: 'GOOGLE_MAPS_API_KEY not set' });
-    const { stops } = req.body; // array of address strings
+    const { stops } = req.body;
     if (!stops || stops.length < 2) return res.status(400).json({ error: 'Need at least 2 stops' });
 
     let totalMiles = 0;
-    let totalSecs = 0;
     const legs = [];
 
     for (let i = 0; i < stops.length - 1; i++) {
-      const url = `https://maps.googleapis.com/maps/api/distancematrix/json?` +
-        `origins=${encodeURIComponent(stops[i])}&destinations=${encodeURIComponent(stops[i+1])}` +
-        `&units=imperial&mode=driving&key=${MAPS_KEY}`;
-
-      const r = await fetch(url);
-      const data = await r.json();
-      const el = data.rows?.[0]?.elements?.[0];
-
-      if (el && el.status === 'OK') {
-        const legMiles = Math.round(el.distance.value * 0.000621371);
-        totalMiles += legMiles;
-        totalSecs += el.duration.value;
-        legs.push({ from: stops[i], to: stops[i+1], miles: legMiles });
+      const result = await calcMilesBetween(stops[i], stops[i+1]);
+      if (result) {
+        totalMiles += result.miles;
+        legs.push({ from: stops[i], to: stops[i+1], miles: result.miles, driveTime: result.driveTime });
       }
     }
 
-    const hours = Math.floor(totalSecs / 3600);
-    const mins = Math.floor((totalSecs % 3600) / 60);
-    res.json({ totalMiles, driveTime: hours + 'h ' + mins + 'm', legs });
+    // Calculate total drive time from total miles (avg 55mph)
+    const totalHours = Math.floor(totalMiles / 55);
+    const totalMins = Math.round((totalMiles % 55) / 55 * 60);
+    res.json({ totalMiles, driveTime: totalHours + 'h ' + totalMins + 'm', legs });
   } catch(e) {
     res.status(400).json({ error: e.message });
   }
