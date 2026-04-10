@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
-
 const app = express();
 
 app.use(cors({ origin: '*' }));
@@ -13,6 +12,7 @@ const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI || 'https://dispatchai-server-production.up.railway.app/callback';
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 const MAPS_KEY = process.env.GOOGLE_MAPS_API_KEY;
+const SAMSARA_KEY = process.env.SAMSARA_API_KEY;
 const PORT = process.env.PORT || 3000;
 
 let tokens = {};
@@ -397,7 +397,126 @@ app.post('/miles/route', async (req, res) => {
   }
 });
 
+// ─── SAMSARA GPS ─────────────────────────────────────────
+async function samsaraGet(path) {
+  const r = await fetch('https://api.samsara.com' + path, {
+    headers: { 'Authorization': 'Bearer ' + SAMSARA_KEY, 'Content-Type': 'application/json' }
+  });
+  if (!r.ok) {
+    const err = await r.text();
+    throw new Error('Samsara API error ' + r.status + ': ' + err.slice(0,200));
+  }
+  return r.json();
+}
+
+// Get all vehicles with live locations
+app.get('/samsara/vehicles', async (req, res) => {
+  try {
+    if (!SAMSARA_KEY) return res.status(400).json({ error: 'SAMSARA_API_KEY not set in Railway Variables' });
+
+    // Fetch vehicle locations
+    const data = await samsaraGet('/fleet/vehicles/locations?limit=512');
+    const vehicles = data.data || [];
+
+    const result = vehicles.map(v => {
+      const loc = v.location || {};
+      const name = (v.name || '').trim();
+      // Extract truck number — Samsara names often contain the truck number
+      // Try to match digits in the name
+      const numMatch = name.match(/\d+/);
+      const truckNum = numMatch ? numMatch[0] : name;
+
+      return {
+        id: v.id,
+        name: name,
+        truckNum: truckNum,
+        lat: loc.latitude,
+        lng: loc.longitude,
+        speed: loc.speedMilesPerHour || 0,
+        heading: loc.heading || 0,
+        address: loc.reverseGeo?.formattedLocation || '',
+        city: extractCity(loc.reverseGeo?.formattedLocation || ''),
+        state: extractState(loc.reverseGeo?.formattedLocation || ''),
+        updatedAt: loc.time || new Date().toISOString(),
+        moving: (loc.speedMilesPerHour || 0) > 2,
+      };
+    });
+
+    console.log(`Samsara: ${result.length} vehicles fetched`);
+    res.json({ vehicles: result, count: result.length, fetchedAt: new Date().toISOString() });
+  } catch(e) {
+    console.error('Samsara error:', e.message);
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// Get single vehicle stats (trip history etc)
+app.get('/samsara/vehicle/:id', async (req, res) => {
+  try {
+    if (!SAMSARA_KEY) return res.status(400).json({ error: 'SAMSARA_API_KEY not set' });
+    const data = await samsaraGet('/fleet/vehicles/' + req.params.id);
+    res.json(data);
+  } catch(e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// Debug endpoint — test Samsara connection
+app.get('/samsara/debug', async (req, res) => {
+  try {
+    if (!SAMSARA_KEY) return res.json({ error: 'SAMSARA_API_KEY not set', keySet: false });
+    const data = await samsaraGet('/fleet/vehicles/locations?limit=5');
+    const vehicles = data.data || [];
+    res.json({
+      connected: true,
+      keyPreview: SAMSARA_KEY.slice(0,15) + '...',
+      totalVehicles: data.pagination?.totalItems || vehicles.length,
+      sampleVehicles: vehicles.slice(0,5).map(v => ({ id: v.id, name: v.name, location: v.location?.reverseGeo?.formattedLocation }))
+    });
+  } catch(e) {
+    res.json({ connected: false, error: e.message });
+  }
+});
+
+function extractCity(addr) {
+  if (!addr) return '';
+  const parts = addr.split(',');
+  return parts.length >= 2 ? parts[parts.length - 3]?.trim() || parts[0]?.trim() : parts[0]?.trim();
+}
+
+function extractState(addr) {
+  if (!addr) return '';
+  const match = addr.match(/,\s*([A-Z]{2})\s*(\d{5})?\s*,/);
+  if (match) return match[1];
+  const parts = addr.split(',');
+  for (const p of parts) {
+    const m = p.trim().match(/^([A-Z]{2})$/);
+    if (m) return m[1];
+  }
+  return '';
+}
+
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// Debug endpoint to test Maps API directly
+app.get('/debug-maps', async (req, res) => {
+  try {
+    if (!MAPS_KEY) return res.json({ error: 'GOOGLE_MAPS_API_KEY not set', vars: Object.keys(process.env).filter(k=>k.includes('GOOGLE')) });
+    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=Chicago,IL&destinations=Atlanta,GA&units=imperial&key=${MAPS_KEY}`;
+    const r = await fetch(url);
+    const data = await r.json();
+    res.json({ 
+      keyPreview: MAPS_KEY.slice(0,10) + '...',
+      status: data.status,
+      errorMessage: data.error_message,
+      rows: data.rows,
+      originAddresses: data.origin_addresses,
+      destinationAddresses: data.destination_addresses,
+    });
+  } catch(e) {
+    res.json({ error: e.message });
+  }
+});
 
 // Session endpoints
 app.post('/session/save', (req, res) => {
