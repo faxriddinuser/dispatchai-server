@@ -409,27 +409,41 @@ async function samsaraGet(path) {
   return r.json();
 }
 
-// Get all vehicles with live locations
+// Get all vehicles with live locations — handles pagination
 app.get('/samsara/vehicles', async (req, res) => {
   try {
     if (!SAMSARA_KEY) return res.status(400).json({ error: 'SAMSARA_API_KEY not set in Railway Variables' });
 
-    // Fetch vehicle locations
-    const data = await samsaraGet('/fleet/vehicles/locations?limit=512');
-    const vehicles = data.data || [];
+    // Fetch ALL vehicles with pagination
+    let allVehicles = [];
+    let cursor = null;
+    let page = 0;
 
-    const result = vehicles.map(v => {
+    do {
+      const url = '/fleet/vehicles/locations?limit=512' + (cursor ? '&after=' + cursor : '');
+      const data = await samsaraGet(url);
+      const batch = data.data || [];
+      allVehicles = allVehicles.concat(batch);
+      cursor = data.pagination?.endCursor;
+      const hasMore = data.pagination?.hasNextPage;
+      page++;
+      console.log(`Samsara page ${page}: ${batch.length} vehicles (total so far: ${allVehicles.length})`);
+      if (!hasMore || page > 20) break; // safety limit
+    } while (cursor);
+
+    const result = allVehicles.map(v => {
       const loc = v.location || {};
       const name = (v.name || '').trim();
-      // Extract truck number — Samsara names often contain the truck number
-      // Try to match digits in the name
-      const numMatch = name.match(/\d+/);
-      const truckNum = numMatch ? numMatch[0] : name;
+      // Extract all digit sequences — truck numbers may be anywhere in the name
+      const numMatches = name.match(/\d+/g) || [];
+      // Take the longest number sequence as the most likely truck number
+      const truckNum = numMatches.sort((a,b) => b.length - a.length)[0] || name;
 
       return {
         id: v.id,
         name: name,
         truckNum: truckNum,
+        allNums: numMatches,  // all number sequences found
         lat: loc.latitude,
         lng: loc.longitude,
         speed: loc.speedMilesPerHour || 0,
@@ -442,8 +456,8 @@ app.get('/samsara/vehicles', async (req, res) => {
       };
     });
 
-    console.log(`Samsara: ${result.length} vehicles fetched`);
-    res.json({ vehicles: result, count: result.length, fetchedAt: new Date().toISOString() });
+    console.log(`Samsara: ${result.length} total vehicles fetched across ${page} pages`);
+    res.json({ vehicles: result, count: result.length, pages: page, fetchedAt: new Date().toISOString() });
   } catch(e) {
     console.error('Samsara error:', e.message);
     res.status(400).json({ error: e.message });
@@ -461,17 +475,38 @@ app.get('/samsara/vehicle/:id', async (req, res) => {
   }
 });
 
-// Debug endpoint — test Samsara connection
+// Debug endpoint — show ALL vehicles and their names for matching
 app.get('/samsara/debug', async (req, res) => {
   try {
     if (!SAMSARA_KEY) return res.json({ error: 'SAMSARA_API_KEY not set', keySet: false });
-    const data = await samsaraGet('/fleet/vehicles/locations?limit=5');
-    const vehicles = data.data || [];
+
+    // Fetch all with pagination
+    let all = [];
+    let cursor = null;
+    let page = 0;
+    do {
+      const url = '/fleet/vehicles/locations?limit=512' + (cursor ? '&after=' + cursor : '');
+      const data = await samsaraGet(url);
+      const batch = data.data || [];
+      all = all.concat(batch);
+      cursor = data.pagination?.endCursor;
+      const hasMore = data.pagination?.hasNextPage;
+      page++;
+      if (!hasMore || page > 20) break;
+    } while (cursor);
+
     res.json({
       connected: true,
       keyPreview: SAMSARA_KEY.slice(0,15) + '...',
-      totalVehicles: data.pagination?.totalItems || vehicles.length,
-      sampleVehicles: vehicles.slice(0,5).map(v => ({ id: v.id, name: v.name, location: v.location?.reverseGeo?.formattedLocation }))
+      totalVehicles: all.length,
+      pages: page,
+      vehicles: all.map(v => ({
+        id: v.id,
+        name: v.name,
+        numbersInName: (v.name || '').match(/\d+/g) || [],
+        location: v.location?.reverseGeo?.formattedLocation || 'No location',
+        speed: v.location?.speedMilesPerHour || 0,
+      }))
     });
   } catch(e) {
     res.json({ connected: false, error: e.message });
