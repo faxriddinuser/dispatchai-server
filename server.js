@@ -434,23 +434,24 @@ app.get('/samsara/vehicles', async (req, res) => {
     const result = allVehicles.map(v => {
       const loc = v.location || {};
       const name = (v.name || '').trim();
-      // Extract all digit sequences — truck numbers may be anywhere in the name
       const numMatches = name.match(/\d+/g) || [];
-      // Take the longest number sequence as the most likely truck number
       const truckNum = numMatches.sort((a,b) => b.length - a.length)[0] || name;
+      const addr = loc.reverseGeo?.formattedLocation || '';
+      const { city, state } = parseCityState(addr);
 
       return {
         id: v.id,
         name: name,
         truckNum: truckNum,
-        allNums: numMatches,  // all number sequences found
+        allNums: numMatches,
         lat: loc.latitude,
         lng: loc.longitude,
         speed: loc.speedMilesPerHour || 0,
         heading: loc.heading || 0,
-        address: loc.reverseGeo?.formattedLocation || '',
-        city: extractCity(loc.reverseGeo?.formattedLocation || ''),
-        state: extractState(loc.reverseGeo?.formattedLocation || ''),
+        address: addr,
+        city: city,
+        state: state,
+        location: city && state ? city + ', ' + state : (city || state || ''),
         updatedAt: loc.time || new Date().toISOString(),
         moving: (loc.speedMilesPerHour || 0) > 2,
       };
@@ -513,23 +514,28 @@ app.get('/samsara/debug', async (req, res) => {
   }
 });
 
-function extractCity(addr) {
-  if (!addr) return '';
-  const parts = addr.split(',');
-  return parts.length >= 2 ? parts[parts.length - 3]?.trim() || parts[0]?.trim() : parts[0]?.trim();
+function parseCityState(addr) {
+  if (!addr) return { city: '', state: '' };
+  let parts = addr.split(',').map(p => p.trim()).filter(Boolean);
+  // Remove trailing zip code
+  if (parts.length > 0 && /^\d{5}(-\d{4})?$/.test(parts[parts.length-1].split(' ')[0])) {
+    parts.pop();
+  }
+  if (parts.length === 0) return { city: '', state: '' };
+  // Last part should now be state (possibly "ST ZIPCODE")
+  const lastPart = parts[parts.length - 1];
+  const stateMatch = lastPart.match(/^([A-Z]{2})/);
+  if (stateMatch) {
+    return {
+      state: stateMatch[1],
+      city: parts.length >= 2 ? parts[parts.length - 2] : ''
+    };
+  }
+  return { city: parts[parts.length - 1], state: '' };
 }
 
-function extractState(addr) {
-  if (!addr) return '';
-  const match = addr.match(/,\s*([A-Z]{2})\s*(\d{5})?\s*,/);
-  if (match) return match[1];
-  const parts = addr.split(',');
-  for (const p of parts) {
-    const m = p.trim().match(/^([A-Z]{2})$/);
-    if (m) return m[1];
-  }
-  return '';
-}
+function extractCity(addr) { return parseCityState(addr).city; }
+function extractState(addr) { return parseCityState(addr).state; }
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
