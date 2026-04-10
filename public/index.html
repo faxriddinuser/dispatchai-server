@@ -291,8 +291,10 @@ select.inp option{background:#111827;}
   </div>
   <div class="panel">
     <div class="ptitle">🚛 Live Fleet Board
-      <span style="font-size:11px;color:#6b7490;font-weight:400;text-transform:none;">Samsara GPS auto-updates every 5 min</span>
-      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+      <span style="font-size:11px;color:#6b7490;font-weight:400;text-transform:none;" id="gps-last-update">Samsara GPS</span>
+      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <span id="gps-match-count" style="font-size:11px;color:#60a5fa;display:none;"></span>
+        <button class="btn-sec" onclick="fetchSamsara()" id="gps-refresh-btn" style="font-size:11px;padding:5px 12px;">📡 Refresh GPS</button>
         <button class="btn-sec" id="fleet-edit-btn" onclick="toggleFleetEdit()" style="display:none;font-size:11px;padding:5px 12px;">✏ Edit Mode</button>
       </div>
     </div>
@@ -1002,7 +1004,11 @@ function renderFleet() {
       // Read-only row
       const trlCell=t.bookedTrl?`<span class="trl-booked">${t.trailer}</span>`:`<span style="color:#d1d5db;">${t.trailer}</span>`;
       const loadCell=t.overdue?`<span class="load-overdue">⚠ ${t.load}</span>`:`<span style="color:#d1d5db;">${t.load||'—'}</span>`;
-      return `<tr class="${rc}"><td>${pmCell}</td><td>${loadCell}</td><td style="font-weight:600;color:#e5e7eb;">${t.truck}</td><td>${trlCell}</td><td class="${dc}">${t.driver}</td><td style="color:#9ca3af;font-size:11px;">${t.phone}</td><td style="color:#6b7490;font-size:11px;">${t.disp}</td><td><span class="sbadge ${sc}">${t.status}</span></td><td style="color:#d1d5db;font-size:11px;">${t.loc}</td><td style="color:#9ca3af;font-size:11px;">${t.dest||'—'}</td></tr>`;
+      const gpsIndicator = t.gpsSpeed !== undefined
+        ? `<span style="font-size:10px;margin-left:4px;color:${t.gpsMoving?'#4ade80':'#6b7490'};" title="${t.gpsAddress||''}">
+            ${t.gpsMoving?'🟢':'🔵'} ${t.gpsSpeed}mph
+          </span>` : '';
+      return `<tr class="${rc}"><td>${pmCell}</td><td>${loadCell}</td><td style="font-weight:600;color:#e5e7eb;">${t.truck}</td><td>${trlCell}</td><td class="${dc}">${t.driver}</td><td style="color:#9ca3af;font-size:11px;">${t.phone}</td><td style="color:#6b7490;font-size:11px;">${t.disp}</td><td><span class="sbadge ${sc}">${t.status}</span></td><td style="color:#d1d5db;font-size:11px;">${t.loc}${gpsIndicator}</td><td style="color:#9ca3af;font-size:11px;">${t.dest||'—'}</td></tr>`;
     }
   }).join('');
 }
@@ -1669,6 +1675,8 @@ function initApp() {
     renderMileage();
     loadHistoryIntoLoadBoard();
   });
+  // Start Samsara GPS polling
+  startSamsaraPolling();
 }
 
 // ===== HISTORICAL DATA =====
@@ -1888,6 +1896,74 @@ Truck: ${l.truck}`,
     });
   });
   renderLoads();
+}
+
+// ===== SAMSARA GPS INTEGRATION =====
+let samsaraVehicles = {};  // truckNum -> vehicle data
+let samsaraTimer = null;
+
+async function fetchSamsara() {
+  const btn = document.getElementById('gps-refresh-btn');
+  const badge = document.getElementById('gps-badge');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>GPS...'; }
+  try {
+    const r = await fetch('/samsara/vehicles');
+    const data = await r.json();
+    if (data.error) { console.error('Samsara:', data.error); if (btn) { btn.disabled=false; btn.innerHTML='📡 Refresh GPS'; } return; }
+
+    const vehicles = data.vehicles || [];
+    samsaraVehicles = {};
+    vehicles.forEach(v => {
+      // Store by truck number for matching
+      if (v.truckNum) samsaraVehicles[v.truckNum] = v;
+      // Also store by full name
+      if (v.name) samsaraVehicles[v.name.trim()] = v;
+    });
+
+    // Match to fleet board and update locations
+    let matched = 0;
+    FLEET.forEach(truck => {
+      const truckNum = truck.truck.toString().trim();
+      const gps = samsaraVehicles[truckNum];
+      if (gps) {
+        matched++;
+        // Update location if truck is moving
+        if (gps.city && gps.state) {
+          const newLoc = gps.city + ', ' + gps.state;
+          if (truck.loc !== newLoc) {
+            logFleetChange(truck.truck, truck.driver, 'Location (GPS)', truck.loc, newLoc);
+            truck.loc = newLoc;
+          }
+        }
+        // Store GPS data on truck for display
+        truck.gpsSpeed = Math.round(gps.speed || 0);
+        truck.gpsMoving = gps.moving;
+        truck.gpsLat = gps.lat;
+        truck.gpsLng = gps.lng;
+        truck.gpsAddress = gps.address;
+        truck.gpsUpdatedAt = gps.updatedAt;
+      }
+    });
+
+    // Update UI
+    if (badge) badge.style.display = 'inline-flex';
+    const matchEl = document.getElementById('gps-match-count');
+    if (matchEl) { matchEl.textContent = matched + '/' + vehicles.length + ' trucks matched'; matchEl.style.display = 'inline'; }
+    const lastEl = document.getElementById('gps-last-update');
+    if (lastEl) lastEl.textContent = 'GPS updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    renderFleet();
+    console.log('Samsara: ' + matched + ' of ' + vehicles.length + ' vehicles matched to fleet board');
+  } catch(e) {
+    console.error('Samsara fetch error:', e.message);
+  }
+  if (btn) { btn.disabled = false; btn.innerHTML = '📡 Refresh GPS'; }
+}
+
+function startSamsaraPolling() {
+  fetchSamsara();  // immediate first fetch
+  if (samsaraTimer) clearInterval(samsaraTimer);
+  samsaraTimer = setInterval(fetchSamsara, 5 * 60 * 1000);  // every 5 min
+  console.log('Samsara polling started — every 5 minutes');
 }
 
 // Run session check immediately — DOM is ready since script is at bottom of body
