@@ -1929,78 +1929,75 @@ async function fetchSamsara() {
       if (v.name) samsaraVehicles[v.name.trim()] = v;
     });
 
-    // Match fleet board trucks to Samsara vehicles
+    // Match fleet board trucks to Samsara vehicles + add unmatched ones
     let matched = 0;
+    const matchedTrucks = new Set();
+
     FLEET.forEach(truck => {
       const truckNum = truck.truck.toString().trim();
       const gps = samsaraVehicles[truckNum];
       if (!gps) return;
       matched++;
+      matchedTrucks.add(truckNum);
 
-      // Parse location from address string
-      const addr = gps.address || '';
-      let city = '', state = '';
-      // Format: "Street, City, ST, ZIP" or "City, ST, ZIP"
-      const parts = addr.split(',').map(s => s.trim());
-      if (parts.length >= 3) {
-        // State is usually the 2-letter code
-        for (let i = 0; i < parts.length; i++) {
-          if (/^[A-Z]{2}$/.test(parts[i])) {
-            state = parts[i];
-            city = parts[i-1] || '';
-            break;
-          }
-          // Sometimes "City, ST ZIPCODE"
-          const stMatch = parts[i].match(/^([A-Z]{2})\s+\d{5}/);
-          if (stMatch) {
-            state = stMatch[1];
-            city = parts[i-1] || '';
-            break;
-          }
-        }
-        // Fallback: second-to-last part before state/zip
-        if (!city && parts.length >= 2) city = parts[parts.length - 3] || parts[0];
-      } else if (parts.length === 2) {
-        city = parts[0]; state = parts[1].slice(0,2);
+      // Use pre-parsed location from server
+      const newLoc = gps.location || '';
+      if (newLoc && truck.loc !== newLoc) {
+        logFleetChange(truck.truck, truck.driver, 'Location (GPS)', truck.loc || 'unknown', newLoc);
+        truck.loc = newLoc;
       }
-
-      if (city && state) {
-        const newLoc = city + ', ' + state;
-        if (truck.loc !== newLoc && city.length > 1) {
-          logFleetChange(truck.truck, truck.driver, 'Location (GPS)', truck.loc || '—', newLoc);
-          truck.loc = newLoc;
-        }
-      }
-
-      // Store GPS data on truck object
       truck.gpsSpeed = Math.round(gps.speed || 0);
-      truck.gpsMoving = gps.moving || (gps.speed > 2);
+      truck.gpsMoving = gps.moving;
       truck.gpsLat = gps.lat;
       truck.gpsLng = gps.lng;
-      truck.gpsAddress = addr;
+      truck.gpsAddress = gps.address;
       truck.gpsUpdatedAt = gps.updatedAt;
-
-      // Auto-update status based on GPS
-      if (gps.moving && ['Ready','Home'].includes(truck.status)) {
-        // Truck is moving but shows Ready/Home — suggest update
-        truck.gpsMismatch = true;
-      }
+      truck.gpsMismatch = gps.moving && ['Ready','Home'].includes(truck.status);
     });
+
+    // Add Samsara trucks not already in fleet board
+    let added = 0;
+    vehicles.forEach(v => {
+      if (!v.truckNum) return;
+      if (matchedTrucks.has(v.truckNum)) return;
+      if (FLEET.find(f => f.truck.toString() === v.truckNum)) return;
+      const nameLower = (v.name || '').toLowerCase();
+      if (nameLower.includes('deactivated') || nameLower === '...' || !v.truckNum.match(/[0-9]/)) return;
+      FLEET.push({
+        pm:'', load:'', truck: v.truckNum, trailer:'PO',
+        driver: v.name !== v.truckNum ? v.name : '#' + v.truckNum,
+        company:'ily', phone:'', disp:'Unassigned',
+        status: v.moving ? 'Ready' : 'Home',
+        loc: v.location || '', dest:'',
+        overdue:false, bookedTrl:false,
+        gpsSpeed: Math.round(v.speed||0), gpsMoving: v.moving,
+        gpsLat: v.lat, gpsLng: v.lng,
+        gpsAddress: v.address, fromSamsara: true,
+      });
+      added++;
+    });
+    if (added > 0) console.log('Added ' + added + ' trucks from Samsara');
 
     // Update header UI
     if (badge) badge.style.display = 'inline-flex';
     const matchEl = document.getElementById('gps-match-count');
     if (matchEl) {
-      matchEl.textContent = matched + ' trucks live';
+      matchEl.textContent = matched + ' matched · ' + vehicles.length + ' total';
       matchEl.style.display = 'inline';
       matchEl.style.color = matched > 0 ? '#4ade80' : '#f87171';
     }
     const lastEl = document.getElementById('gps-last-update');
     if (lastEl) lastEl.textContent = 'GPS • ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-
+    // Update fleet stats
+    document.getElementById('fs-total').textContent = FLEET.length;
+    document.getElementById('fs-active').textContent = FLEET.filter(t=>!['Home','OOS','FIRED'].includes(t.status)&&t.load).length;
+    document.getElementById('fs-ready').textContent = FLEET.filter(t=>t.status==='Ready').length;
+    document.getElementById('fs-home').textContent = FLEET.filter(t=>['Home','OOS'].includes(t.status)).length;
+    document.getElementById('fs-pm').textContent = FLEET.filter(t=>t.pm).length;
+    document.getElementById('fs-overdue').textContent = FLEET.filter(t=>t.overdue).length;
     renderFleet();
-    showToast(matched + ' trucks updated from Samsara GPS');
-    console.log('Samsara: ' + matched + '/' + vehicles.length + ' vehicles matched');
+    showToast(matched + ' trucks GPS updated · ' + FLEET.length + ' total in fleet');
+    console.log('Samsara: ' + matched + '/' + vehicles.length + ' matched, ' + FLEET.length + ' total fleet');
   } catch(e) {
     console.error('Samsara fetch error:', e.message);
     showToast('GPS update failed: ' + e.message, 'err');
